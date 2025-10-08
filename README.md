@@ -12,4 +12,3 @@
 вариант запуска через докер (тоже предварительно зайти в папку с проектом cd PetMatch-frontend)
 docker build -t petmatch-frontend .
 docker run -p 5173:5173 petmatch-frontend
-

@@ -1,32 +1,52 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { increment, decrement } from '../store/exampleSlice';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
 import { fetchHello, selectHelloResponse, selectHelloLoading, selectHelloError } from '../store/helloSlice';
-import type { RootState, AppDispatch } from '../store';
-import ExampleForm from '../components/ExampleForm';
+import type { AppDispatch } from '../store';
+import Input, { LabelPosition } from '../components/Input';
+import styles from './Home.module.css';
+
+// Define the form schema with Yup
+const schema = yup.object({
+  textInput: yup.string().required('Text input is required').min(3, 'Must be at least 3 characters'),
+  emailInput: yup.string().email('Invalid email').required('Email is required'),
+  textareaInput: yup.string().required('Message is required').min(10, 'Message must be at least 10 characters'),
+  passwordInput: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+}).required();
 
 const Home: React.FC = () => {
-  const count = useSelector((state: RootState) => state.example.value);
   const helloResponse = useSelector(selectHelloResponse);
   const loading = useSelector(selectHelloLoading);
   const error = useSelector(selectHelloError);
   const dispatch: AppDispatch = useDispatch();
+
+  const {
+    register,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    mode: 'onBlur',
+  });
 
   const handleHelloClick = () => {
     dispatch(fetchHello());
   };
 
   return (
-    <div>
-      <h1>Welcome to PetMatch</h1>
-      <p>Find your perfect pet companion!</p>
+    <div className={styles.home}>
+      <div className={styles.home__header}>
+        <h1 className={styles.home__title}>Welcome to PetMatch</h1>
+        <p className={styles.home__subtitle}>Find your perfect pet companion!</p>
+      </div>
       
       {/* Hello Button Section */}
-      <div className="card mt-4">
-        <div className="card-body">
-          <h5 className="card-title">Hello API Test</h5>
+      <div className={styles.home__section}>
+        <div>
+          <h5 className={styles['home__section-title']}>Hello API Test</h5>
           <button
-            className="btn btn-primary"
+            className={`${styles.home__button} ${styles['home__button--primary']}`}
             onClick={handleHelloClick}
             disabled={loading}
           >
@@ -34,34 +54,59 @@ const Home: React.FC = () => {
           </button>
           
           {helloResponse && (
-            <div className="mt-3">
-              <h6>Response:</h6>
+            <div className={styles['home__response']}>
+              <h6 className={styles['home__response-title']}>Response:</h6>
               <pre>{helloResponse}</pre>
             </div>
           )}
           
           {error && (
-            <div className="mt-3 alert alert-danger">
+            <div className={styles['home__error']}>
               Error: {error}
             </div>
           )}
         </div>
       </div>
-      
-      <div className="card mt-4">
-        <div className="card-body">
-          <h5 className="card-title">Counter Example</h5>
-          <p className="card-text">Count: {count}</p>
-          <button className="btn btn-primary me-2" onClick={() => dispatch(increment())}>
-            Increment
-          </button>
-          <button className="btn btn-secondary" onClick={() => dispatch(decrement())}>
-            Decrement
-          </button>
+
+      {/* Input Component Examples with Validation */}
+      <div className={`${styles.home__section} ${styles['home__section--input-examples']}`}>
+        <div>
+          <h5 className={styles['home__section-title']}>Input Component Examples with Validation</h5>
+          
+          <Input
+            label="Text Input (Top)"
+            placeholder="Enter some text (min 3 characters)"
+            {...register('textInput')}
+            error={errors.textInput?.message}
+          />
+          
+          <Input
+            label="Email Input (Left)"
+            type="email"
+            placeholder="Enter your email"
+            {...register('emailInput')}
+            error={errors.emailInput?.message}
+            labelPosition={LabelPosition.LEFT}
+          />
+          
+          <Input
+            label="Textarea (Top)"
+            type="textarea"
+            placeholder="Enter a message (min 10 characters)"
+            {...register('textareaInput')}
+            error={errors.textareaInput?.message}
+          />
+          
+          <Input
+            label="Password (Left)"
+            type="password"
+            placeholder="Enter password (min 6 characters)"
+            {...register('passwordInput')}
+            error={errors.passwordInput?.message}
+            labelPosition={LabelPosition.LEFT}
+          />
         </div>
       </div>
-      
-      <ExampleForm />
     </div>
   );
 };
