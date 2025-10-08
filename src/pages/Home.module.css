@@ -100,4 +100,15 @@
   padding: 1rem;
   margin-top: 1rem;
   color: #842029;
+
+.home__input-group {
+  margin-bottom: 1rem;
+}
+
+.home__radio-container {
+  border: 1px solid #AC7F5E;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
 }

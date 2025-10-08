@@ -7,6 +7,7 @@ import { fetchHello, selectHelloResponse, selectHelloLoading, selectHelloError }
 import type { AppDispatch } from '../store';
 import Input, { LabelPosition } from '../components/Input';
 import Button from '../components/Button';
+import RadioButton from '../components/RadioButton';
 import axios from 'axios';
 import styles from './Home.module.css';
 
@@ -41,6 +42,9 @@ const Home: React.FC = () => {
 
   // Track form validity separately from error display
   const [isFormValid, setIsFormValid] = React.useState(false);
+  
+  // State for RadioButton example
+  const [selectedPetType, setSelectedPetType] = React.useState<string>('dog');
 
   // Validate form silently (without showing errors)
   React.useEffect(() => {
@@ -74,6 +78,14 @@ const Home: React.FC = () => {
       // You can add error handling here, such as showing an error message
     }
   };
+
+  // RadioButton options for pet types
+  const petTypeOptions = [
+    { value: 'dog', label: 'Dog' },
+    { value: 'cat', label: 'Cat' },
+    { value: 'bird', label: 'Bird' },
+    { value: 'fish', label: 'Fish' },
+  ];
 
   return (
     <div className={styles.home}>
@@ -145,6 +157,17 @@ const Home: React.FC = () => {
               {...register('passwordInput')}
               error={errors.passwordInput?.message}
               labelPosition={LabelPosition.LEFT}
+            />
+            
+            {/* RadioButton Example */}
+            <RadioButton
+              name="petType"
+              label="Preferred Pet Type"
+              options={petTypeOptions}
+              selectedValue={selectedPetType}
+              onChange={setSelectedPetType}
+              inline={true}
+              labelPosition="left"
             />
             
             <Button

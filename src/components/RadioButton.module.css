@@ -1,0 +1,73 @@
+.radioButtonWrapper {
+  margin-bottom: 1rem;
+}
+
+.radioButtonWrapperHorizontal {
+  display: flex;
+  align-items: flex-start;
+}
+
+.radioButtonLabel {
+  display: inline-block;
+  margin-bottom: 0.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  text-align: left;
+  width: 100%;
+}
+
+.radioButtonLabelLeft {
+  margin-right: 1rem;
+  margin-bottom: 0;
+  padding-top: 0.375rem;
+  min-width: 100px;
+  text-align: right;
+  width: max-content;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+}
+
+.radioButtonContainer {
+  border: 1px solid #AC7F5E;
+  border-radius: 6px;
+  padding: 0.375rem 1rem;
+  flex: 1;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.radioButtonOption {
+  margin-right: 1rem;
+  margin-bottom: 0;
+}
+
+.radioButtonOption:last-child {
+  margin-right: 0;
+}
+
+/* Override Bootstrap default styles for radio buttons with higher specificity */
+.radioButtonContainer :global(input[type="radio"]:checked) {
+  background-color: #AC7F5E;
+  border-color: #AC7F5E;
+}
+
+.radioButtonContainer :global(input[type="radio"]:focus) {
+  box-shadow: 0 0 0 0.25rem rgba(80, 40, 14, 0.25);
+  border-color: #AC7F5E;
+}
+
+.radioButtonContainer :global(.form-check-label) {
+  color: inherit;
+}
+
+.selectedValue {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #6c757d;
+}
