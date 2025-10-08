@@ -6,6 +6,8 @@ import * as yup from 'yup';
 import { fetchHello, selectHelloResponse, selectHelloLoading, selectHelloError } from '../store/helloSlice';
 import type { AppDispatch } from '../store';
 import Input, { LabelPosition } from '../components/Input';
+import Button from '../components/Button';
+import axios from 'axios';
 import styles from './Home.module.css';
 
 // Define the form schema with Yup
@@ -24,14 +26,53 @@ const Home: React.FC = () => {
 
   const {
     register,
-    formState: { errors },
+    handleSubmit,
+    watch,
+    trigger,
+    formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(schema),
-    mode: 'onBlur',
+    mode: 'onBlur', // Errors appear only on blur
+    reValidateMode: 'onBlur',
   });
+
+  // Watch all form fields for changes
+  const formData = watch();
+
+  // Track form validity separately from error display
+  const [isFormValid, setIsFormValid] = React.useState(false);
+
+  // Validate form silently (without showing errors)
+  React.useEffect(() => {
+    // Debounce validation to prevent infinite loops
+    const timeoutId = setTimeout(async () => {
+      // Only validate when all fields have values
+      if (formData.textInput && formData.emailInput && formData.textareaInput && formData.passwordInput) {
+        // Temporarily disable error reporting
+        const result = await trigger(undefined, { shouldFocus: false });
+        setIsFormValid(result);
+      } else {
+        setIsFormValid(false);
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [formData, trigger]);
 
   const handleHelloClick = () => {
     dispatch(fetchHello());
+  };
+
+  const onSubmit = async (data: any) => {
+    try {
+      const host = import.meta.env.VITE_API_HOST || 'http://localhost:3000';
+      const response = await axios.post(`${host}/test`, data);
+      console.log('Form submitted successfully:', response.data);
+      // You can add success handling here, such as showing a success message
+    } catch (error) {
+      console.error('Form submission failed:', error);
+      // You can add error handling here, such as showing an error message
+    }
   };
 
   return (
@@ -72,39 +113,48 @@ const Home: React.FC = () => {
       <div className={`${styles.home__section} ${styles['home__section--input-examples']}`}>
         <div>
           <h5 className={styles['home__section-title']}>Input Component Examples with Validation</h5>
-          
-          <Input
-            label="Text Input (Top)"
-            placeholder="Enter some text (min 3 characters)"
-            {...register('textInput')}
-            error={errors.textInput?.message}
-          />
-          
-          <Input
-            label="Email Input (Left)"
-            type="email"
-            placeholder="Enter your email"
-            {...register('emailInput')}
-            error={errors.emailInput?.message}
-            labelPosition={LabelPosition.LEFT}
-          />
-          
-          <Input
-            label="Textarea (Top)"
-            type="textarea"
-            placeholder="Enter a message (min 10 characters)"
-            {...register('textareaInput')}
-            error={errors.textareaInput?.message}
-          />
-          
-          <Input
-            label="Password (Left)"
-            type="password"
-            placeholder="Enter password (min 6 characters)"
-            {...register('passwordInput')}
-            error={errors.passwordInput?.message}
-            labelPosition={LabelPosition.LEFT}
-          />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Input
+              label="Text Input (Top)"
+              placeholder="Enter some text (min 3 characters)"
+              {...register('textInput')}
+              error={errors.textInput?.message}
+            />
+            
+            <Input
+              label="Email Input (Left)"
+              type="email"
+              placeholder="Enter your email"
+              {...register('emailInput')}
+              error={errors.emailInput?.message}
+              labelPosition={LabelPosition.LEFT}
+            />
+            
+            <Input
+              label="Textarea (Top)"
+              type="textarea"
+              placeholder="Enter a message (min 10 characters)"
+              {...register('textareaInput')}
+              error={errors.textareaInput?.message}
+            />
+            
+            <Input
+              label="Password (Left)"
+              type="password"
+              placeholder="Enter password (min 6 characters)"
+              {...register('passwordInput')}
+              error={errors.passwordInput?.message}
+              labelPosition={LabelPosition.LEFT}
+            />
+            
+            <Button
+              type="submit"
+              size="large"
+              disabled={!isFormValid || isSubmitting}
+            >
+              {isSubmitting ? 'Submitting...' : 'Зарегистрироваться'}
+            </Button>
+          </form>
         </div>
       </div>
     </div>
