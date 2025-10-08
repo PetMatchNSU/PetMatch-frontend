@@ -1,0 +1,103 @@
+.home {
+  padding: 1rem;
+}
+
+.home__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.home__title {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.home__subtitle {
+  font-size: 1.25rem;
+  color: #666;
+}
+
+.home__section {
+  background-color: #f8f9fa;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.home__section--input-examples {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+}
+
+.home__section-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #495057;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.home__button {
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid transparent;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, 
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.home__button--primary {
+  color: #fff;
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.home__button--primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0a58ca;
+}
+
+.home__button--secondary {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+
+.home__button--secondary:hover {
+  background-color: #5c636a;
+  border-color: #565e64;
+}
+
+.home__button:disabled {
+  opacity: 0.65;
+}
+
+.home__counter {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.home__response {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.home__response-title {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.home__error {
+  background-color: #f8d7da;
+  border: 1px solid #f5c2c7;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  color: #842029;
+}
