@@ -1,0 +1,58 @@
+.button {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+  border: 1px solid #AC7F5E;
+  border-radius: 6px;
+  background-color: #AC7F5E;
+  color: #FFFFFF;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.button:hover:not(.button--disabled):not(:disabled) {
+  background-color: #966d52;
+  border-color: #966d52;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.button:active:not(.button--disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.button--disabled {
+  background-color: #CDB49F;
+  border-color: #CDB49F;
+  color: #B79176;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.button--small {
+  font-size: 14px;
+  padding: 6px 12px;
+  height: 36px;
+  width: 108px;
+}
+
+.button--medium {
+  font-size: 16px;
+  padding: 6px 16px;
+  height: 36px;
+  width: 190px; /* Average of 108px and 272px */
+}
+
+.button--large {
+  font-size: 18px;
+  padding: 6px 24px;
+  height: 36px;
+  width: 272px;
+}
