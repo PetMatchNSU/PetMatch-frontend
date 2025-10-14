@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { fetchHello, selectHelloResponse, selectHelloLoading, selectHelloError } from '../store/helloSlice';
 import type { AppDispatch } from '../store';
-import Input, { LabelPosition } from '../components/Input';
-import Button from '../components/Button';
-import RadioButton from '../components/RadioButton';
+import Input, { LabelPosition } from '../components/Input/Input';
+import Button from '../components/Button/Button';
+import RadioButton from '../components/RadioButton/RadioButton';
+import Select from '../components/Select/Select';
+import type { SingleValue, MultiValue, ActionMeta } from 'react-select';
 import axios from 'axios';
 import styles from './Home.module.css';
 
@@ -17,13 +19,21 @@ const schema = yup.object({
   emailInput: yup.string().email('Invalid email').required('Email is required'),
   textareaInput: yup.string().required('Message is required').min(10, 'Message must be at least 10 characters'),
   passwordInput: yup.string().required('Password is required').min(6, 'Password must be at least 6 characters'),
+  city: yup.string().required('City is required'),
 }).required();
+
+interface SelectOption {
+  value: string;
+  label: string;
+}
 
 const Home: React.FC = () => {
   const helloResponse = useSelector(selectHelloResponse);
   const loading = useSelector(selectHelloLoading);
   const error = useSelector(selectHelloError);
   const dispatch: AppDispatch = useDispatch();
+  
+  const [selectedCity, setSelectedCity] = useState<SingleValue<SelectOption> | MultiValue<SelectOption>>(null);
 
   const {
     register,
@@ -51,7 +61,7 @@ const Home: React.FC = () => {
     // Debounce validation to prevent infinite loops
     const timeoutId = setTimeout(async () => {
       // Only validate when all fields have values
-      if (formData.textInput && formData.emailInput && formData.textareaInput && formData.passwordInput) {
+      if (formData.textInput && formData.emailInput && formData.textareaInput && formData.passwordInput && selectedCity) {
         // Temporarily disable error reporting
         const result = await trigger(undefined, { shouldFocus: false });
         setIsFormValid(result);
@@ -61,7 +71,7 @@ const Home: React.FC = () => {
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [formData, trigger]);
+  }, [formData, selectedCity, trigger]);
 
   const handleHelloClick = () => {
     dispatch(fetchHello());
@@ -70,7 +80,10 @@ const Home: React.FC = () => {
   const onSubmit = async (data: any) => {
     try {
       const host = import.meta.env.VITE_API_HOST || 'http://localhost:3000';
-      const response = await axios.post(`${host}/test`, data);
+      const response = await axios.post(`${host}/test`, {
+        ...data,
+        city: (selectedCity as SingleValue<SelectOption>)?.value
+      });
       console.log('Form submitted successfully:', response.data);
       // You can add success handling here, such as showing a success message
     } catch (error) {
@@ -85,6 +98,16 @@ const Home: React.FC = () => {
     { value: 'cat', label: 'Cat' },
     { value: 'bird', label: 'Bird' },
     { value: 'fish', label: 'Fish' },
+  ];
+  
+  // City options for select
+  const cityOptions: SelectOption[] = [
+    { value: 'moscow', label: 'Moscow' },
+    { value: 'saint-petersburg', label: 'Saint Petersburg' },
+    { value: 'novosibirsk', label: 'Novosibirsk' },
+    { value: 'ekaterinburg', label: 'Ekaterinburg' },
+    { value: 'kazan', label: 'Kazan' },
+    { value: 'nizhny-novgorod', label: 'Nizhny Novgorod' },
   ];
 
   return (
@@ -157,6 +180,17 @@ const Home: React.FC = () => {
               {...register('passwordInput')}
               error={errors.passwordInput?.message}
               labelPosition={LabelPosition.LEFT}
+            />
+            
+            {/* Select with searchable cities */}
+            <Select
+              label="City (Searchable)"
+              options={cityOptions}
+              value={selectedCity}
+              onChange={setSelectedCity}
+              placeholder="Select your city..."
+              isSearchable={true}
+              error={errors.city?.message}
             />
             
             {/* RadioButton Example */}
