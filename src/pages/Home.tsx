@@ -9,6 +9,7 @@ import Input, { LabelPosition } from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
+import Toggle from '../components/Toggle/Toggle';
 import type { SingleValue, MultiValue, ActionMeta } from 'react-select';
 import axios from 'axios';
 import styles from './Home.module.css';
@@ -55,6 +56,13 @@ const Home: React.FC = () => {
   
   // State for RadioButton example
   const [selectedPetType, setSelectedPetType] = React.useState<string>('dog');
+  
+  // State for Toggle example
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState<boolean>(false);
+  
+  const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNotificationsEnabled(e.target.checked);
+  };
 
   // Validate form silently (without showing errors)
   React.useEffect(() => {
@@ -201,6 +209,14 @@ const Home: React.FC = () => {
               selectedValue={selectedPetType}
               onChange={setSelectedPetType}
               inline={true}
+              labelPosition="left"
+            />
+            
+            {/* Toggle Example */}
+            <Toggle
+              label="Enable Notifications"
+              checked={notificationsEnabled}
+              onChange={handleToggleChange}
               labelPosition="left"
             />
             
