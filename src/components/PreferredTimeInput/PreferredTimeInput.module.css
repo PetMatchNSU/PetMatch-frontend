@@ -1,0 +1,98 @@
+.preferred-time-input {
+  position: relative;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.preferred-time-input__container {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.preferred-time-input__label {
+  margin-right: 1rem;
+  margin-bottom: 0;
+  padding-top: 0.375rem;
+  min-width: 100px;
+  text-align: left;
+  width: max-content;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+}
+
+.preferred-time-input__wrapper {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 110px); /* Subtract label width and margin */
+  border: 1px solid #AC7F5E;
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  box-sizing: border-box;
+}
+
+.preferred-time-input__first-half {
+  display: flex;
+  align-items: center;
+  width: 50%;
+}
+
+.preferred-time-input__second-half {
+  display: flex;
+  align-items: center;
+  width: 50%;
+}
+
+.preferred-time-input__prefix {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  white-space: nowrap;
+  margin-right: 0.5rem;
+}
+
+.preferred-time-input__time-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.preferred-time-input__time {
+  border: none;
+  padding: 0;
+  box-shadow: none;
+  background: transparent;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  box-sizing: border-box;
+  width: 100%;
+  /* text-align: center; */
+}
+
+.preferred-time-input__time:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.preferred-time-input__separator {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  white-space: nowrap;
+  margin-right: 0.5rem;
+}
+
+.preferred-time-input__error {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+}
