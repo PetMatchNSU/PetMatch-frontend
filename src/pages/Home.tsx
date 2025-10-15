@@ -9,6 +9,7 @@ import Input, { LabelPosition } from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
+import Checkbox from '../components/Checkbox/Checkbox';
 import Toggle from '../components/Toggle/Toggle';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
@@ -249,6 +250,33 @@ const Home: React.FC = () => {
               placeholder="Select your city..."
               isSearchable={true}
               error={errors.city?.message}
+            />
+
+            {/* Select with searchable cities */}
+            <Select
+              label="City (Searchable)"
+              options={cityOptions}
+              value={selectedCity}
+              onChange={setSelectedCity}
+              placeholder="Select your city..."
+              isSearchable={true}
+              error={errors.city?.message}
+            />
+
+            {/* Checkbox Example */}
+            <Checkbox 
+              label="Согласен с условиями"
+            />
+            {/* Error Checkbox Example */}
+            <Checkbox 
+              label="Подписаться на рассылку"
+              error="Это поле обязательно для заполнения"
+            />
+
+            {/* Disabled Checkbox Example */}
+            <Checkbox 
+              label="Принять условия"
+              disabled
             />
             
             {/* RadioButton Example */}
