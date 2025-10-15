@@ -5,7 +5,7 @@
   font-size: 16px;
   font-weight: 300;
   line-height: 1.5;
-  color: #212529;
+  color: #50280E;
   background-color: #fff;
   background-clip: padding-box;
   border: 1px solid #AC7F5E;
@@ -23,11 +23,11 @@
 }
 
 .input:focus {
-  color: #212529;
+  color: #50280E;
   background-color: #fff;
-  border-color: #86b7fe;
+  border-color: #AC7F5E;
   outline: 0;
-  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  box-shadow: 0 0 0 0.25rem rgba(123, 48, 7, 0.25);
 }
 
 .input--invalid {
@@ -36,7 +36,7 @@
 
 .input--invalid:focus {
   border-color: #dc3545;
-  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+  /* box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25); */
 }
 
 .input-group {
@@ -54,7 +54,7 @@
   font-size: 1rem;
   font-weight: 400;
   line-height: 1.5;
-  color: #212529;
+  color: #50280E;
   text-align: center;
   white-space: nowrap;
   background-color: #e9ecef;

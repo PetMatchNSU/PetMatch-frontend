@@ -1,6 +1,6 @@
 .toggleWrapper {
   position: relative;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 }
 
 .toggleWrapperHorizontal {
@@ -37,12 +37,27 @@
 }
 
 /* Style the react-bootstrap switch */
+.toggleContainer :global(.form-check) {
+  margin-bottom: 0;
+  min-height: unset;
+  padding-left: 0;
+}
+
+.toggleContainer :global(.form-switch) {
+  margin-bottom: 0;
+  padding-left: 0;
+}
+
 .toggleContainer :global(.form-switch .form-check-input) {
   width: 2.5em;
   height: 1.5em;
   background-color: #fff;
   border-color: #AC7F5E;
   position: relative;
+  margin: 0;
+  padding: 0;
+  border-radius: 0.75em;
+  box-shadow: none;
 }
 
 .toggleContainer :global(.form-switch .form-check-input:checked) {
@@ -82,7 +97,7 @@
 .toggleError {
   display: block;
   width: 100%;
-  margin-top: 0.25rem;
+  margin-top: 0;
   font-size: 0.875em;
   color: #dc3545;
 }
