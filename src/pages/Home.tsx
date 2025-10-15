@@ -10,6 +10,7 @@ import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
 import Toggle from '../components/Toggle/Toggle';
+import RegistrationTable from '../components/RegistrationTable';
 import type { SingleValue, MultiValue, ActionMeta } from 'react-select';
 import axios from 'axios';
 import styles from './Home.module.css';
@@ -26,6 +27,20 @@ const schema = yup.object({
 interface SelectOption {
   value: string;
   label: string;
+}
+
+interface ContactInfo {
+  email: string;
+  phone: string;
+  telegram: string;
+  vk: string;
+}
+
+interface VisibilitySettings {
+  email: boolean;
+  phone: boolean;
+  telegram: boolean;
+  vk: boolean;
 }
 
 const Home: React.FC = () => {
@@ -60,6 +75,21 @@ const Home: React.FC = () => {
   // State for Toggle example
   const [notificationsEnabled, setNotificationsEnabled] = React.useState<boolean>(false);
   
+  // State for contact information table
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    email: '',
+    phone: '',
+    telegram: '',
+    vk: ''
+  });
+  
+  const [visibility, setVisibility] = useState<VisibilitySettings>({
+    email: false,
+    phone: false,
+    telegram: false,
+    vk: false
+  });
+  
   const handleToggleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNotificationsEnabled(e.target.checked);
   };
@@ -90,7 +120,9 @@ const Home: React.FC = () => {
       const host = import.meta.env.VITE_API_HOST || 'http://localhost:3000';
       const response = await axios.post(`${host}/test`, {
         ...data,
-        city: (selectedCity as SingleValue<SelectOption>)?.value
+        city: (selectedCity as SingleValue<SelectOption>)?.value,
+        contactInfo,
+        visibility
       });
       console.log('Form submitted successfully:', response.data);
       // You can add success handling here, such as showing a success message
@@ -188,6 +220,14 @@ const Home: React.FC = () => {
               {...register('passwordInput')}
               error={errors.passwordInput?.message}
               labelPosition={LabelPosition.LEFT}
+            />
+            
+            {/* Registration Table */}
+            <RegistrationTable
+              onContactInfoChange={setContactInfo}
+              onVisibilityChange={setVisibility}
+              contactInfo={contactInfo}
+              visibility={visibility}
             />
             
             {/* Select with searchable cities */}

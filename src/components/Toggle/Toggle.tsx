@@ -9,6 +9,7 @@ interface ToggleProps extends Omit<FormCheckProps, 'type' | 'labelPosition'> {
   label?: string;
   labelPosition?: LabelPosition;
   error?: string;
+  wrapperClassName?: string;
 }
 
 const Toggle: React.FC<ToggleProps> = ({
@@ -19,12 +20,13 @@ const Toggle: React.FC<ToggleProps> = ({
   disabled = false,
   error,
   id,
+  wrapperClassName = '',
   ...props
 }) => {
   const isHorizontal = labelPosition === 'left';
   
   return (
-    <div className={`${styles.toggleWrapper} ${isHorizontal ? styles.toggleWrapperHorizontal : ''}`}>
+    <div className={`${styles.toggleWrapper} ${isHorizontal ? styles.toggleWrapperHorizontal : ''} ${wrapperClassName}`.trim()}>
       {label && (
         <div className={`${styles.toggleLabel} ${isHorizontal ? styles.toggleLabelLeft : ''}`}>
           {label}
