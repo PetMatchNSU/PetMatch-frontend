@@ -1,0 +1,33 @@
+.linksBlock {
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  color: #50280E;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.link {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  text-decoration: none;
+  line-height: 1.4;
+  transition: color 0.15s ease-in-out;
+}
+
+.link:hover {
+  color: #AC7F5E;
+  text-decoration: underline;
+}

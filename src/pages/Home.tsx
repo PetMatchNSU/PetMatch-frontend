@@ -9,6 +9,7 @@ import Input, { LabelPosition } from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
+import LinksBlock from '../components/LinksBlock';
 import Toggle from '../components/Toggle/Toggle';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
@@ -249,6 +250,15 @@ const Home: React.FC = () => {
               placeholder="Select your city..."
               isSearchable={true}
               error={errors.city?.message}
+            />
+
+            {/* Link Block Example */}
+            <LinksBlock 
+              title="Дополнительная информация"
+              links={[
+                { text: "Условия использования", to: "/terms" },
+                { text: "Контакты", to: "/contacts" }
+              ]}
             />
             
             {/* RadioButton Example */}
