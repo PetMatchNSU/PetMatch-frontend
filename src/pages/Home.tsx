@@ -10,6 +10,7 @@ import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
 import Toggle from '../components/Toggle/Toggle';
+import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
 import type { SingleValue, MultiValue, ActionMeta } from 'react-select';
 import axios from 'axios';
@@ -75,6 +76,9 @@ const Home: React.FC = () => {
   // State for Toggle example
   const [notificationsEnabled, setNotificationsEnabled] = React.useState<boolean>(false);
   
+  // State for preferred contact time
+  const [preferredTime, setPreferredTime] = React.useState<string>('');
+  
   // State for contact information table
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     email: '',
@@ -121,6 +125,7 @@ const Home: React.FC = () => {
       const response = await axios.post(`${host}/test`, {
         ...data,
         city: (selectedCity as SingleValue<SelectOption>)?.value,
+        preferredTime,
         contactInfo,
         visibility
       });
@@ -220,6 +225,11 @@ const Home: React.FC = () => {
               {...register('passwordInput')}
               error={errors.passwordInput?.message}
               labelPosition={LabelPosition.LEFT}
+            />
+            
+            <PreferredTimeInput
+              value={preferredTime}
+              onChange={setPreferredTime}
             />
             
             {/* Registration Table */}
