@@ -10,6 +10,7 @@ import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
 import Checkbox from '../components/Checkbox/Checkbox';
+import LinksBlock from '../components/LinksBlock';
 import Toggle from '../components/Toggle/Toggle';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
@@ -287,6 +288,14 @@ const Home: React.FC = () => {
             <Checkbox 
               label="Принять условия"
               disabled
+            />
+            {/* Link Block Example */}
+            <LinksBlock 
+              title="Дополнительная информация"
+              links={[
+                { text: "Условия использования", to: "/terms" },
+                { text: "Контакты", to: "/contacts" }
+              ]}
             />
             
             {/* RadioButton Example */}
