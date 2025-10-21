@@ -13,6 +13,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(({
   description,
   className = '',
   id,
+  checked,
   ...props
 }, ref) => {
   const checkboxId = id || `checkbox-${Math.random().toString(36).substr(2, 9)}`;
@@ -31,6 +32,7 @@ const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(({
           ref={ref}
           id={checkboxId}
           className={styles['checkbox-input']}
+          checked={checked}
           {...props}
         />
         <label htmlFor={checkboxId} className={styles['checkbox-label']}>

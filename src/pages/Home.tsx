@@ -76,6 +76,12 @@ const Home: React.FC = () => {
   
   // State for Toggle example
   const [notificationsEnabled, setNotificationsEnabled] = React.useState<boolean>(false);
+
+  // State for Checkbox example
+  const [checkboxState, setCheckboxState] = React.useState<boolean>(false);
+
+  // State for Checkbox example
+  const [errorCheckboxState, setErrorCheckboxState] = React.useState<boolean>(false);
   
   // State for preferred contact time
   const [preferredTime, setPreferredTime] = React.useState<string>('');
@@ -266,11 +272,15 @@ const Home: React.FC = () => {
             {/* Checkbox Example */}
             <Checkbox 
               label="Согласен с условиями"
+              checked={checkboxState}
+              onChange={(e) => setCheckboxState(e.target.checked)}
             />
             {/* Error Checkbox Example */}
             <Checkbox 
               label="Подписаться на рассылку"
               error="Это поле обязательно для заполнения"
+              checked={errorCheckboxState}
+              onChange={(e) => setErrorCheckboxState(e.target.checked)}
             />
 
             {/* Disabled Checkbox Example */}
