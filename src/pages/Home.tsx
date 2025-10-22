@@ -9,6 +9,7 @@ import Input, { LabelPosition } from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
+import Checkbox from '../components/Checkbox/Checkbox';
 import LinksBlock from '../components/LinksBlock';
 import Toggle from '../components/Toggle/Toggle';
 import PreferredTimeInput from '../components/PreferredTimeInput';
@@ -76,6 +77,12 @@ const Home: React.FC = () => {
   
   // State for Toggle example
   const [notificationsEnabled, setNotificationsEnabled] = React.useState<boolean>(false);
+
+  // State for Checkbox example
+  const [checkboxState, setCheckboxState] = React.useState<boolean>(false);
+
+  // State for Checkbox example
+  const [errorCheckboxState, setErrorCheckboxState] = React.useState<boolean>(false);
   
   // State for preferred contact time
   const [preferredTime, setPreferredTime] = React.useState<string>('');
@@ -252,6 +259,35 @@ const Home: React.FC = () => {
               error={errors.city?.message}
             />
 
+            {/* Select with searchable cities */}
+            <Select
+              label="City (Searchable)"
+              options={cityOptions}
+              value={selectedCity}
+              onChange={setSelectedCity}
+              placeholder="Select your city..."
+              isSearchable={true}
+              error={errors.city?.message}
+            />
+
+            {/* Checkbox Example */}
+            <Checkbox 
+              label="Согласен с условиями"
+              checked={checkboxState}
+              onChange={(e) => setCheckboxState(e.target.checked)}
+            />
+            {/* Error Checkbox Example */}
+            <Checkbox 
+              label="Подписаться на рассылку"
+              error="Это поле обязательно для заполнения"
+              checked={errorCheckboxState}
+              onChange={(e) => setErrorCheckboxState(e.target.checked)}
+            />
+
+            {/* Disabled Checkbox Example */}
+            <Checkbox 
+              label="Принять условия"
+              disabled
             {/* Link Block Example */}
             <LinksBlock 
               title="Дополнительная информация"
