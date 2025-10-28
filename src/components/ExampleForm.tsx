@@ -65,7 +65,7 @@ const ExampleForm: React.FC = () => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="container">
       <h2>Example Form</h2>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-3">
