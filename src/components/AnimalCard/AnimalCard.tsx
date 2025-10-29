@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './AnimalCard.module.css';
 
 interface Animal {
@@ -26,6 +27,7 @@ interface AnimalCardProps {
 export const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
   const [showActions, setShowActions] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -128,11 +130,14 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
           {/* Actions dropdown */}
           {showActions && (
             <div className={styles['card__actions-dropdown']}>
-              <button className={styles['card__edit-button']}>
-                Редактировать
+              <button
+                className={styles['card__edit-button']}
+                onClick={() => navigate(`/animal/update/${animal.animalId}`)}
+              >
+                редактировать
               </button>
               <button className={styles['card__delete-button']}>
-                Удалить
+                удалить
               </button>
             </div>
           )}

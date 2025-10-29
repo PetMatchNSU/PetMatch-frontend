@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import AnimalCard from '../components/AnimalCard';
-import styles from './Feed.module.css';
+import Button from '../components/Button/Button';
+import styles from './Pets.module.css';
 
 // Mock data based on API response
 const mockAnimals = [
@@ -91,15 +93,22 @@ const mockAnimals = [
   }
 ];
 
-export const Feed: React.FC = () => {
+export const Pets: React.FC = () => {
+  const navigate = useNavigate();
+  
   return (
-    <div className={styles.feed}>
-      <div className={styles.feed__container}>
-        <div className={styles.feed__header}>
-          <h1 className={styles.feed__title}>Каталог животных</h1>
-          <p className={styles.feed__subtitle}>Найдите себе верного друга</p>
+    <div className={styles.pets}>
+      <div className={styles.pets__container}>
+        <div className={styles.pets__header}>
+          <div className={styles.pets__headerContent}>
+            <div className={styles.pets__actions}>
+              <Button onClick={() => navigate('/animal/create')}>
+                Добавить питомца
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className={styles.feed__cards}>
+        <div className={styles.pets__cards}>
           {mockAnimals.map(animal => (
             <AnimalCard key={animal.animalId} animal={animal} />
           ))}
@@ -108,3 +117,5 @@ export const Feed: React.FC = () => {
     </div>
   );
 };
+
+export default Pets;
