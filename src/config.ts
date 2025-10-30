@@ -1,0 +1,1 @@
+export const VITE_API_HOST="http://petmatch-service:8091";
