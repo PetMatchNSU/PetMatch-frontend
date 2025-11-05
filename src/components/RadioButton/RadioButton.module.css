@@ -42,6 +42,11 @@
   flex-wrap: wrap;
 }
 
+.radioButtonContainerDisabled {
+  background-color: #f5f5f5;
+  cursor: pointer;
+}
+
 .radioButtonOption {
   margin-right: 1rem;
   margin-bottom: 0;

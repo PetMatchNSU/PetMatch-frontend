@@ -126,7 +126,7 @@
 }
 
 .checkbox-input:disabled + .checkbox-label {
-  cursor: not-allowed;
+  cursor: pointer;
   opacity: 0.6;
 }
 

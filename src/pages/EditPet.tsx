@@ -36,6 +36,13 @@ const EditPet: React.FC = () => {
   const [additionalPhotos, setAdditionalPhotos] = useState<Photo[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
   
+  // Separate state for each document type
+  const [vetPassport, setVetPassport] = useState<Document | null>(null);
+  const [pedigree, setPedigree] = useState<Document | null>(null);
+  const [vetCertificate, setVetCertificate] = useState<Document | null>(null);
+  const [diplomas, setDiplomas] = useState<Document | null>(null);
+  const [otherDocuments, setOtherDocuments] = useState<Document | null>(null);
+  
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +51,9 @@ const EditPet: React.FC = () => {
   
   // Check if we're in edit mode
   const isEditMode = location.pathname.includes('/update/');
+  
+  // State for view/edit mode
+  const [isViewMode, setIsViewMode] = useState(true);
   
   // Load initial data
   useEffect(() => {
@@ -104,15 +114,55 @@ const EditPet: React.FC = () => {
           setAdditionalPhotos(additional);
           
           // Initialize documents
-          const docEntries = Object.entries(petResponse.documents).filter(([key, value]) => value !== null);
-          const initializedDocuments = docEntries.map(([key, docId], index) => ({
-            id: docId as number,
-            file: null,
-            url: `https://example.com/document/${docId}`,
-            isDeleted: false,
-            type: key.replace('Id', '')
-          }));
-          setDocuments(initializedDocuments);
+          if (petResponse.documents.vetPassportId) {
+            setVetPassport({
+              id: petResponse.documents.vetPassportId,
+              file: null,
+              url: `https://example.com/document/${petResponse.documents.vetPassportId}`,
+              isDeleted: false,
+              type: 'vetPassport'
+            });
+          }
+          
+          if (petResponse.documents.pedigreeId) {
+            setPedigree({
+              id: petResponse.documents.pedigreeId,
+              file: null,
+              url: `https://example.com/document/${petResponse.documents.pedigreeId}`,
+              isDeleted: false,
+              type: 'pedigree'
+            });
+          }
+          
+          if (petResponse.documents.vetCertificatesId) {
+            setVetCertificate({
+              id: petResponse.documents.vetCertificatesId,
+              file: null,
+              url: `https://example.com/document/${petResponse.documents.vetCertificatesId}`,
+              isDeleted: false,
+              type: 'vetCertificate'
+            });
+          }
+          
+          if (petResponse.documents.diplomasId) {
+            setDiplomas({
+              id: petResponse.documents.diplomasId,
+              file: null,
+              url: `https://example.com/document/${petResponse.documents.diplomasId}`,
+              isDeleted: false,
+              type: 'diplomas'
+            });
+          }
+          
+          if (petResponse.documents.otherDocumentsId) {
+            setOtherDocuments({
+              id: petResponse.documents.otherDocumentsId,
+              file: null,
+              url: `https://example.com/document/${petResponse.documents.otherDocumentsId}`,
+              isDeleted: false,
+              type: 'other'
+            });
+          }
         }
       } catch (err) {
         setError('Ошибка загрузки данных');
@@ -127,8 +177,11 @@ const EditPet: React.FC = () => {
   
   // Track unsaved changes
   useEffect(() => {
-    setHasUnsavedChanges(true);
-  }, [formData, mainPhoto, additionalPhotos, documents]);
+    // Не устанавливаем флаг изменений при первой загрузке данных
+    if (isEditMode && petData) {
+      setHasUnsavedChanges(true);
+    }
+  }, [formData, mainPhoto, additionalPhotos, vetPassport, pedigree, vetCertificate, diplomas, otherDocuments, isEditMode, petData]);
   
   // Handle form field changes
   const handleInputChange = (field: keyof PetFormData, value: any) => {
@@ -188,11 +241,136 @@ const EditPet: React.FC = () => {
         setMainPhoto({ ...mainPhoto, isDeleted: true });
       }
     } else {
-      setAdditionalPhotos(prev => 
-        prev.map(photo => 
+      setAdditionalPhotos(prev =>
+        prev.map(photo =>
           photo.id === id ? { ...photo, isDeleted: true } : photo
         )
       );
+    }
+  };
+  
+  // File validation helper
+  const validateFile = (file: File): boolean => {
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/png', 'image/jpg'];
+    const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+    
+    if (!allowedTypes.includes(file.type)) {
+      alert('Недопустимый формат файла. Разрешены только PDF, DOC, DOCX, JPG, PNG, JPEG.');
+      return false;
+    }
+    
+    if (file.size > maxSize) {
+      alert('Файл слишком большой. Максимальный размер файла - 5 МБ.');
+      return false;
+    }
+    
+    return true;
+  };
+  
+  // Handle document uploads for each type
+  const handleVetPassportUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !validateFile(file)) return;
+    
+    const fileUrl = URL.createObjectURL(file);
+    
+    setVetPassport({
+      id: Date.now(),
+      file,
+      url: fileUrl,
+      isDeleted: false,
+      type: 'vetPassport'
+    });
+  };
+  
+  const handlePedigreeUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !validateFile(file)) return;
+    
+    const fileUrl = URL.createObjectURL(file);
+    
+    setPedigree({
+      id: Date.now(),
+      file,
+      url: fileUrl,
+      isDeleted: false,
+      type: 'pedigree'
+    });
+  };
+  
+  const handleVetCertificateUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !validateFile(file)) return;
+    
+    const fileUrl = URL.createObjectURL(file);
+    
+    setVetCertificate({
+      id: Date.now(),
+      file,
+      url: fileUrl,
+      isDeleted: false,
+      type: 'vetCertificate'
+    });
+  };
+  
+  const handleDiplomasUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !validateFile(file)) return;
+    
+    const fileUrl = URL.createObjectURL(file);
+    
+    setDiplomas({
+      id: Date.now(),
+      file,
+      url: fileUrl,
+      isDeleted: false,
+      type: 'diplomas'
+    });
+  };
+  
+  const handleOtherDocumentsUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !validateFile(file)) return;
+    
+    const fileUrl = URL.createObjectURL(file);
+    
+    setOtherDocuments({
+      id: Date.now(),
+      file,
+      url: fileUrl,
+      isDeleted: false,
+      type: 'other'
+    });
+  };
+  
+  // Remove document handlers for each type
+  const removeVetPassport = () => {
+    if (vetPassport) {
+      setVetPassport({ ...vetPassport, isDeleted: true, file: null, url: '' });
+    }
+  };
+  
+  const removePedigree = () => {
+    if (pedigree) {
+      setPedigree({ ...pedigree, isDeleted: true, file: null, url: '' });
+    }
+  };
+  
+  const removeVetCertificate = () => {
+    if (vetCertificate) {
+      setVetCertificate({ ...vetCertificate, isDeleted: true, file: null, url: '' });
+    }
+  };
+  
+  const removeDiplomas = () => {
+    if (diplomas) {
+      setDiplomas({ ...diplomas, isDeleted: true, file: null, url: '' });
+    }
+  };
+  
+  const removeOtherDocuments = () => {
+    if (otherDocuments) {
+      setOtherDocuments({ ...otherDocuments, isDeleted: true, file: null, url: '' });
     }
   };
   
@@ -234,6 +412,11 @@ const EditPet: React.FC = () => {
   
   // Save pet data
   const savePet = async () => {
+    // Не сохраняем в режиме просмотра
+    if (isViewMode) {
+      return;
+    }
+    
     if (!isFormValid()) {
       setError('Пожалуйста, заполните все обязательные поля');
       return;
@@ -318,10 +501,28 @@ const EditPet: React.FC = () => {
     <div className={styles.container}>
       <form noValidate onSubmit={(e) => {
         e.preventDefault();
-        savePet();
+        // Сохраняем только если не в режиме просмотра
+        if (!isViewMode) {
+          savePet();
+        }
       }}>
       <div className={styles.header}>
         <h1>{isEditMode ? 'Редактирование питомца' : 'Добавление питомца'}</h1>
+        {isEditMode && (
+          <Button
+            type="button"
+            onClick={() => {
+              if (!isViewMode) {
+                // Переход из режима редактирования в режим просмотра без сохранения
+                setHasUnsavedChanges(false);
+              }
+              setIsViewMode(!isViewMode);
+            }}
+            className={styles.editButton}
+          >
+            {isViewMode ? 'Редактировать' : 'Отменить'}
+          </Button>
+        )}
       </div>
       
       {error && (
@@ -341,6 +542,7 @@ const EditPet: React.FC = () => {
                   value={formData.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   placeholder="Введите кличку питомца"
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -354,6 +556,7 @@ const EditPet: React.FC = () => {
                   value={speciesOptions.find(option => option.value === formData.speciesId?.toString()) || null}
                   onChange={(selected: any) => handleInputChange('speciesId', selected ? parseInt(selected.value) : null)}
                   placeholder="Выберите вид животного"
+                  isDisabled={isViewMode}
                 />
               </div>
             </div>
@@ -371,6 +574,7 @@ const EditPet: React.FC = () => {
                   selectedValue={formData.hasBreed === null ? undefined : formData.hasBreed.toString()}
                   onChange={(value) => handleInputChange('hasBreed', value === 'true')}
                   inline
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -383,6 +587,7 @@ const EditPet: React.FC = () => {
                     value={formData.breed}
                     onChange={(e) => handleInputChange('breed', e.target.value)}
                     placeholder="Введите породу питомца"
+                    disabled={isViewMode}
                   />
                 </div>
               </div>
@@ -401,6 +606,7 @@ const EditPet: React.FC = () => {
                   selectedValue={formData.gender || undefined}
                   onChange={(value) => handleInputChange('gender', value)}
                   inline
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -413,6 +619,7 @@ const EditPet: React.FC = () => {
                   type="date"
                   value={formData.birthday}
                   onChange={(e) => handleInputChange('birthday', e.target.value)}
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -426,6 +633,7 @@ const EditPet: React.FC = () => {
                   value={formData.weight || ''}
                   onChange={(e) => handleInputChange('weight', e.target.value ? parseFloat(e.target.value) : null)}
                   placeholder="Введите вес питомца"
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -438,6 +646,7 @@ const EditPet: React.FC = () => {
                   value={formData.color}
                   onChange={(e) => handleInputChange('color', e.target.value)}
                   placeholder="Опишите окрас питомца"
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -450,6 +659,7 @@ const EditPet: React.FC = () => {
                   value={formData.geneticDiseases}
                   onChange={(e) => handleInputChange('geneticDiseases', e.target.value)}
                   placeholder="Опишите наследственные заболевания"
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -463,6 +673,7 @@ const EditPet: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   placeholder="Опишите питомца"
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -479,15 +690,17 @@ const EditPet: React.FC = () => {
                     {mainPhoto && !mainPhoto.isDeleted ? (
                       <div className={styles.photoPreview}>
                         <img src={mainPhoto.url} alt="Основное фото" />
-                        <button
-                          type="button"
-                          className={styles.removePhoto}
-                          onClick={() => removePhoto(mainPhoto.id, true)}
-                        >
-                          Удалить
-                        </button>
+                        {!isViewMode && (
+                          <button
+                            type="button"
+                            className={styles.removePhoto}
+                            onClick={() => removePhoto(mainPhoto.id, true)}
+                          >
+                            Удалить
+                          </button>
+                        )}
                       </div>
-                    ) : (
+                    ) : !isViewMode ? (
                       <div className={styles.photoPlaceholder}>
                         <input
                           type="file"
@@ -495,10 +708,15 @@ const EditPet: React.FC = () => {
                           onChange={(e) => handlePhotoUpload(e, true)}
                           style={{ display: 'none' }}
                           id="main-photo-upload"
+                          disabled={isViewMode}
                         />
                         <label htmlFor="main-photo-upload" className={styles.uploadButton}>
                           Загрузить основное фото
                         </label>
+                      </div>
+                    ) : (
+                      <div className={styles.photoPlaceholder}>
+                        Основное фото не загружено
                       </div>
                     )}
                   </div>
@@ -515,28 +733,33 @@ const EditPet: React.FC = () => {
                       .map(photo => (
                         <div key={photo.id} className={styles.photoPreview}>
                           <img src={photo.url} alt={`Доп. фото ${photo.id}`} />
-                          <button
-                            type="button"
-                            className={styles.removePhoto}
-                            onClick={() => removePhoto(photo.id)}
-                          >
-                            Удалить
-                          </button>
+                          {!isViewMode && (
+                            <button
+                              type="button"
+                              className={styles.removePhoto}
+                              onClick={() => removePhoto(photo.id)}
+                            >
+                              Удалить
+                            </button>
+                          )}
                         </div>
                       ))}
                     
-                    <div className={styles.photoPlaceholder}>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoUpload}
-                        style={{ display: 'none' }}
-                        id="additional-photo-upload"
-                      />
-                      <label htmlFor="additional-photo-upload" className={styles.uploadButton}>
-                        + Добавить фото
-                      </label>
-                    </div>
+                    {!isViewMode && (
+                      <div className={styles.photoPlaceholder}>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          style={{ display: 'none' }}
+                          id="additional-photo-upload"
+                          disabled={isViewMode}
+                        />
+                        <label htmlFor="additional-photo-upload" className={styles.uploadButton}>
+                          + Добавить фото
+                        </label>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -547,34 +770,210 @@ const EditPet: React.FC = () => {
               <div className={styles.formGroup}>
                 <div className={styles.label}>Документы</div>
                 <div className={styles.inputWrapper}>
-                  <div className={styles.additionalPhotos}>
-                    {documents
-                      .filter(doc => !doc.isDeleted)
-                      .map(doc => (
-                        <div key={doc.id} className={styles.documentPreview}>
-                          <div className={styles.documentName}>
-                            {doc.file ? doc.file.name : 'Документ.pdf'}
+                  <div className={styles.documentSection}>
+                    {/* Veterinary Passport */}
+                    <div className={styles.documentItem}>
+                      <div className={styles.documentLabel}>Ветеринарный паспорт</div>
+                      <div className={styles.documentUpload}>
+                        {vetPassport && !vetPassport.isDeleted ? (
+                          <div className={styles.documentPreview}>
+                            <div className={styles.documentName}>
+                              {vetPassport.file ? vetPassport.file.name : 'vet_passport.pdf'}
+                            </div>
+                            {!isViewMode && (
+                              <button
+                                type="button"
+                                className={styles.removeDocument}
+                                onClick={removeVetPassport}
+                              >
+                                ×
+                              </button>
+                            )}
                           </div>
-                          <button
-                            type="button"
-                            className={styles.removePhoto}
-                            onClick={() => removeDocument(doc.type)}
-                          >
-                            Удалить
-                          </button>
-                        </div>
-                      ))}
+                        ) : !isViewMode ? (
+                          <div className={styles.documentPlaceholder}>
+                            <input
+                              type="file"
+                              onChange={handleVetPassportUpload}
+                              style={{ display: 'none' }}
+                              id="vet-passport-upload"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              disabled={isViewMode}
+                            />
+                            <label htmlFor="vet-passport-upload" className={styles.uploadButton}>
+                              Загрузить
+                            </label>
+                          </div>
+                        ) : (
+                          <div className={styles.documentPlaceholder}>
+                            Ветеринарный паспорт не загружен
+                          </div>
+                        )}
+                      </div>
+                    </div>
                     
-                    <div className={styles.documentPlaceholder}>
-                      <input
-                        type="file"
-                        onChange={handleDocumentUpload}
-                        style={{ display: 'none' }}
-                        id="document-upload"
-                      />
-                      <label htmlFor="document-upload" className={styles.uploadButton}>
-                        + Добавить документ
-                      </label>
+                    {/* Pedigree */}
+                    <div className={styles.documentItem}>
+                      <div className={styles.documentLabel}>Родословная (метрика)</div>
+                      <div className={styles.documentUpload}>
+                        {pedigree && !pedigree.isDeleted ? (
+                          <div className={styles.documentPreview}>
+                            <div className={styles.documentName}>
+                              {pedigree.file ? pedigree.file.name : 'pedigree.pdf'}
+                            </div>
+                            {!isViewMode && (
+                              <button
+                                type="button"
+                                className={styles.removeDocument}
+                                onClick={removePedigree}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ) : !isViewMode ? (
+                          <div className={styles.documentPlaceholder}>
+                            <input
+                              type="file"
+                              onChange={handlePedigreeUpload}
+                              style={{ display: 'none' }}
+                              id="pedigree-upload"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              disabled={isViewMode}
+                            />
+                            <label htmlFor="pedigree-upload" className={styles.uploadButton}>
+                              Загрузить
+                            </label>
+                          </div>
+                        ) : (
+                          <div className={styles.documentPlaceholder}>
+                            Родословная не загружена
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Veterinary Certificate */}
+                    <div className={styles.documentItem}>
+                      <div className={styles.documentLabel}>Ветеринарная справка</div>
+                      <div className={styles.documentUpload}>
+                        {vetCertificate && !vetCertificate.isDeleted ? (
+                          <div className={styles.documentPreview}>
+                            <div className={styles.documentName}>
+                              {vetCertificate.file ? vetCertificate.file.name : 'vet_certificate.pdf'}
+                            </div>
+                            {!isViewMode && (
+                              <button
+                                type="button"
+                                className={styles.removeDocument}
+                                onClick={removeVetCertificate}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ) : !isViewMode ? (
+                          <div className={styles.documentPlaceholder}>
+                            <input
+                              type="file"
+                              onChange={handleVetCertificateUpload}
+                              style={{ display: 'none' }}
+                              id="vet-certificate-upload"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              disabled={isViewMode}
+                            />
+                            <label htmlFor="vet-certificate-upload" className={styles.uploadButton}>
+                              Загрузить
+                            </label>
+                          </div>
+                        ) : (
+                          <div className={styles.documentPlaceholder}>
+                            Ветеринарная справка не загружена
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Diplomas */}
+                    <div className={styles.documentItem}>
+                      <div className={styles.documentLabel}>Дипломы</div>
+                      <div className={styles.documentUpload}>
+                        {diplomas && !diplomas.isDeleted ? (
+                          <div className={styles.documentPreview}>
+                            <div className={styles.documentName}>
+                              {diplomas.file ? diplomas.file.name : 'diplomas.pdf'}
+                            </div>
+                            {!isViewMode && (
+                              <button
+                                type="button"
+                                className={styles.removeDocument}
+                                onClick={removeDiplomas}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ) : !isViewMode ? (
+                          <div className={styles.documentPlaceholder}>
+                            <input
+                              type="file"
+                              onChange={handleDiplomasUpload}
+                              style={{ display: 'none' }}
+                              id="diplomas-upload"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              disabled={isViewMode}
+                            />
+                            <label htmlFor="diplomas-upload" className={styles.uploadButton}>
+                              Загрузить
+                            </label>
+                          </div>
+                        ) : (
+                          <div className={styles.documentPlaceholder}>
+                            Дипломы не загружены
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Other Documents */}
+                    <div className={styles.documentItem}>
+                      <div className={styles.documentLabel}>Другое</div>
+                      <div className={styles.documentUpload}>
+                        {otherDocuments && !otherDocuments.isDeleted ? (
+                          <div className={styles.documentPreview}>
+                            <div className={styles.documentName}>
+                              {otherDocuments.file ? otherDocuments.file.name : 'other_documents.pdf'}
+                            </div>
+                            {!isViewMode && (
+                              <button
+                                type="button"
+                                className={styles.removeDocument}
+                                onClick={removeOtherDocuments}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ) : !isViewMode ? (
+                          <div className={styles.documentPlaceholder}>
+                            <input
+                              type="file"
+                              onChange={handleOtherDocumentsUpload}
+                              style={{ display: 'none' }}
+                              id="other-documents-upload"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              disabled={isViewMode}
+                            />
+                            <label htmlFor="other-documents-upload" className={styles.uploadButton}>
+                              Загрузить
+                            </label>
+                          </div>
+                        ) : (
+                          <div className={styles.documentPlaceholder}>
+                            Другие документы не загружены
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -590,6 +989,7 @@ const EditPet: React.FC = () => {
                   value={goalOptions.find(option => option.value === formData.goal) || null}
                   onChange={(selected: any) => handleInputChange('goal', selected?.value || '')}
                   placeholder="Выберите цель размещения"
+                  isDisabled={isViewMode}
                 />
               </div>
             </div>
@@ -604,6 +1004,7 @@ const EditPet: React.FC = () => {
                     value={formData.cost || ''}
                     onChange={(e) => handleInputChange('cost', e.target.value ? parseFloat(e.target.value) : null)}
                     placeholder="Введите цену"
+                    disabled={isViewMode}
                   />
                 </div>
               </div>
@@ -612,19 +1013,21 @@ const EditPet: React.FC = () => {
         </div>
         
         {/* Buttons */}
-        <div className={styles.buttons}>
-          <Button
-            type="submit"
-            disabled={!isFormValid() || saving}
-          >
-            {saving ? 'Сохранение...' : 'Сохранить'}
-          </Button>
-          <Button
-            onClick={handleCancel}
-          >
-            Отменить
-          </Button>
-        </div>
+        {!isViewMode && (
+          <div className={styles.buttons}>
+            <Button
+              type="submit"
+              disabled={!isFormValid() || saving}
+            >
+              {saving ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+            <Button
+              onClick={handleCancel}
+            >
+              Отменить
+            </Button>
+          </div>
+        )}
       </div>
       
       {/* Cancel modal */}
