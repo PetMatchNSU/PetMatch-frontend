@@ -111,6 +111,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
         {animal.birthday}
       </div>
 
+      {/* Divider line */}
+      <hr className={styles.card__divider} />
+
       {/* Goal and actions in one row */}
       <div className={styles.card__footer}>
         <div className={styles.card__goal}>
