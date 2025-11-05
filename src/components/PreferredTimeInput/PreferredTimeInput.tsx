@@ -1,15 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './PreferredTimeInput.module.css';
 
+
+export const LabelPosition = {
+  TOP: 'top',
+  LEFT: 'left',
+} as const;
+
+type LabelPositionType = typeof LabelPosition[keyof typeof LabelPosition];
+
 interface PreferredTimeInputProps {
   label?: string;
   value?: string;
+  labelPosition?: LabelPositionType;
   onChange?: (value: string) => void;
   error?: string;
 }
 
 const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
   label = 'Предпочитаемое время связи',
+  labelPosition = LabelPosition.TOP,
   value = '',
   onChange,
   error

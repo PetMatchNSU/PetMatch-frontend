@@ -1,6 +1,6 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import About from './pages/About'
-import Home from './pages/Home'
+import Home from './pages/Registration'
 import './App.css'
 
 function App() {
@@ -11,7 +11,7 @@ function App() {
         <div className="container">
           <Link className="navbar-brand" to="/">PetMatch</Link>
           <div className="navbar-nav">
-            <Link className="nav-link" to="/">Home</Link>
+            <Link className="nav-link" to="/register">Registration</Link>
             <Link className="nav-link" to="/about">About</Link>
           </div>
         </div>
