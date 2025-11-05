@@ -1,4 +1,14 @@
+import axios from 'axios';
+
 const API_BASE_URL = '/api/v1';
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 // Mock delay function for simulating API calls
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -201,6 +211,37 @@ const mockPets: any[] = [
 ];
 
 export const api = {
+  // Get cities
+  getCities: async (query: string): Promise<any> => {
+    const response = await apiClient.get('/city', {
+      params: { name: query }
+    });
+    return response.data;
+  },
+
+  // User registration
+  registerUser: async (userData: any): Promise<any> => {
+    const response = await apiClient.post('/user/register', userData);
+    return response.data;
+  },
+
+  // User login
+  loginUser: async (credentials: any): Promise<any> => {
+    const response = await apiClient.post('/user/login', credentials);
+    return response.data;
+  },
+
+  // Get user profile
+  getUserProfile: async (): Promise<any> => {
+    const response = await apiClient.get('/user/profile');
+    return response.data;
+  },
+
+  // Update user profile
+  updateUserProfile: async (profileData: any): Promise<any> => {
+    const response = await apiClient.put('/user/profile', profileData);
+    return response.data;
+  },
   // Get animal info (species and goals)
   getAnimalInfo: async (): Promise<any> => {
     await delay(500); // Simulate network delay

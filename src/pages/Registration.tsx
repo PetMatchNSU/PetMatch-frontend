@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { api } from '../services/api';
 import Input, { LabelPosition } from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import LinksBlock from '../components/LinksBlock/LinksBlock';
@@ -11,7 +12,6 @@ import Checkbox from '../components/Checkbox/Checkbox';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
 import type { SingleValue } from 'react-select';
-import axios from 'axios';
 import styles from './Registration.module.css';
 
 const schema = yup.object({
@@ -112,6 +112,8 @@ const Registration: React.FC = () => {
   const [cityOptions, setCityOptions] = useState<SelectOption[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [allCities, setAllCities] = useState<SelectOption[]>([]);
+  const [filteredCities, setFilteredCities] = useState<SelectOption[]>([]);
   
   const [contactInfo, setContactInfo] = useState<ContactInfo>({
     email: '',
@@ -129,39 +131,21 @@ const Registration: React.FC = () => {
 
   const formData = watch();
 
-  const fetchCities = async (query: string = '') => {
-    if (query.length < 2) {
-      setCityOptions([]);
+  useEffect(() => {
+    if (!searchQuery) {
+      setFilteredCities(allCities);
       return;
     }
 
-    setIsLoadingCities(true);
-    try {
-      const response = await axios.get<CityApiResponse>('/api/v1/city', {
-        params: { name: query }
-      });
+    const filtered = allCities.filter(city =>
+      city.label.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredCities(filtered);
+  }, [searchQuery, allCities]);
 
-      const options: SelectOption[] = response.data.locations.map(location => ({
-        value: `${location.city}, ${location.region}`,
-        label: `${location.city}, ${location.region}`
-      }));
-
-      setCityOptions(options);
-    } catch (error) {
-      console.error('Ошибка при загрузке городов:', error);
-      setCityOptions([]);
-    } finally {
-      setIsLoadingCities(false);
-    }
+  const handleCitySearch = (inputValue: string) => {
+    setSearchQuery(inputValue);
   };
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchCities(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery]);
 
   useEffect(() => {
     const timeoutId = setTimeout(async () => {
@@ -189,8 +173,8 @@ const Registration: React.FC = () => {
     setValue('city', newValue?.value || '', { shouldValidate: true });
   };
 
-  const handleGenderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGender(e.target.checked ? 'female' : 'male');
+  const handleGenderChange = (selectedValue: string) => {
+    setGender(selectedValue as 'male' | 'female');
   };
 
   const genderOptions = [
@@ -202,24 +186,17 @@ const Registration: React.FC = () => {
     setServerError(null);
     
     try {
-      const mockResponse: RegistrationResponse = {
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token'
-      };
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // В реальном приложении здесь будет:
-      // const response = await axios.post('/api/v1/user/register', {
-      //   email: data.email,
-      //   fullName: data.fullName,
-      //   gender,
-      //   city: selectedCity?.value,
-      //   preferredTime,
-      //   contactInfo,
-      //   visibility,
-      //   password: data.password,
-      // });
+      const result = await api.registerUser({
+        email: data.email,
+        fullName: data.fullName,
+        gender,
+        city: selectedCity?.value,
+        preferredTime,
+        contactInfo,
+        visibility,
+        password: data.password,
+      });
 
       console.log('Registration data:', {
         email: data.email,
@@ -296,11 +273,13 @@ const Registration: React.FC = () => {
 
           <Select
             label="Город проживания"
-            options={cityOptions}
+            options={filteredCities}
             value={selectedCity}
             onChange={handleCityChange}
+            onInputChange={handleCitySearch}
             placeholder="Выберите город..."
             isSearchable={true}
+            isLoading={isLoadingCities}
             error={errors.city?.message}
             labelPosition={LabelPosition.TOP}
           />
