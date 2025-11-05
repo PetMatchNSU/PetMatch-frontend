@@ -1,0 +1,170 @@
+.card {
+  border: 1px solid #50280E;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  width: 100%;
+  background-color: #CDB49F;
+  min-height: 380px;
+  box-sizing: border-box;
+}
+
+.card__photo {
+  width: 100%;
+  height: 160px;
+  background-color: #f0f0f0;
+  border: 1px solid #50280E;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.card__city {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #50280E;
+  font-weight: normal;
+  color: black;
+  background-color: white;
+  font-size: 0.8rem;
+}
+
+.card__gender {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  background-color: white;
+  border: 1px solid #50280E;
+  border-radius: 6px;
+  text-align: center;
+  line-height: 28px;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.card__name {
+  font-weight: normal;
+  background-color: white;
+  padding: 6px 10px;
+  border: 1px solid #50280E;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.card__species {
+  font-weight: normal;
+  background-color: white;
+  padding: 5px 8px;
+  border: 1px solid #50280E;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.card__breed {
+  font-weight: normal;
+  background-color: white;
+  padding: 5px 8px;
+  border: 1px solid #50280E;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.card__birthday {
+  font-weight: normal;
+  background-color: white;
+  padding: 5px 8px;
+  border: 1px solid #50280E;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.card__city_footer {
+  font-weight: normal;
+  background-color: white;
+  padding: 5px 8px;
+  border: 1px solid #50280E;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.card__date {
+  font-weight: normal;
+  background-color: white;
+  padding: 5px 8px;
+  border: 1px solid #50280E;
+  border-radius: 6px;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.card__divider {
+  width: 100%;
+  border-color: #50280E;
+  border-width: 1px;
+  opacity: 1;
+  margin: 0;
+}
+
+.card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .card {
+    padding: 12px;
+    gap: 10px;
+    min-height: 350px;
+  }
+  
+  .card__photo {
+    height: 140px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 12px;
+    gap: 10px;
+    min-height: 350px;
+  }
+  
+  .card__photo {
+    height: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 10px;
+    gap: 8px;
+    min-height: 320px;
+  }
+  
+  .card__photo {
+    height: 120px;
+  }
+  
+  .card__name {
+    font-size: 1rem;
+  }
+}
