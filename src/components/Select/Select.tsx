@@ -20,12 +20,14 @@ interface CustomSelectProps extends Omit<ReactSelectProps<SelectOption>, 'labelP
   label?: string;
   labelPosition?: LabelPositionType;
   error?: string;
+  isDisabled?: boolean;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
   label,
   labelPosition = LabelPosition.TOP,
   error,
+  isDisabled = false,
   className = '',
   ...props
 }) => {
@@ -44,7 +46,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
       '&:hover': {
         borderColor: '#966d52',
       },
-      backgroundColor: '#fff',
+      backgroundColor: isDisabled ? '#f5f5f5' : '#fff',
+      cursor: isDisabled ? 'not-allowed' : 'default',
     }),
     menu: (provided: any) => ({
       ...provided,
@@ -104,6 +107,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
         <ReactSelect
           className={`${styles.reactSelect} ${className}`}
           styles={customStyles}
+          isDisabled={isDisabled}
           {...props}
         />
         

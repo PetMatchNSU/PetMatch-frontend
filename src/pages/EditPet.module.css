@@ -7,12 +7,16 @@
 .header {
   text-align: center;
   margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .header h1 {
   font-size: 2rem;
   color: #50280E;
   margin-bottom: 10px;
+  flex: 1;
 }
 
 .subtitle {
@@ -143,10 +147,33 @@
   gap: 15px;
 }
 
+.documentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.documentItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.documentLabel {
+  font-weight: 500;
+  color: #50280E;
+  font-size: 14px;
+}
+
+.documentUpload {
+  display: flex;
+  align-items: center;
+}
+
 .documentPreview {
   position: relative;
-  width: 200px;
-  height: 60px;
+  width: 100%;
+  min-height: 40px;
   border: 1px dashed #ccc;
   border-radius: 8px;
   overflow: hidden;
@@ -166,9 +193,27 @@
   margin-right: 30px;
 }
 
+.removeDocument {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
 .documentPlaceholder {
-  width: 200px;
-  height: 60px;
+  width: 100%;
+  min-height: 40px;
   border: 1px dashed #ccc;
   border-radius: 8px;
   display: flex;
@@ -254,10 +299,18 @@
     align-items: flex-start;
     gap: 8px;
   }
-  
+
   .documentName {
     width: 100%;
     word-break: break-word;
+  }
+
+  .documentItem {
+    gap: 3px;
+  }
+
+  .documentLabel {
+    font-size: 13px;
   }
 }
 
@@ -334,6 +387,14 @@
     padding: 2px 5px;
   }
   
+  .documentItem {
+    gap: 2px;
+  }
+  
+  .documentLabel {
+    font-size: 0.85rem;
+  }
+  
   .buttons {
     margin-top: 15px;
     gap: 10px;
@@ -365,7 +426,7 @@
 .buttons button:first-child:disabled {
   background: #ccc;
   border-color: #ccc;
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 .error {
