@@ -269,7 +269,6 @@ const Home: React.FC = () => {
               isSearchable={true}
               error={errors.city?.message}
             />
-
             {/* Checkbox Example */}
             <Checkbox 
               label="Согласен с условиями"

@@ -31,7 +31,7 @@
   background-color: #CDB49F;
   border-color: #CDB49F;
   color: #B79176;
-  cursor: not-allowed;
+  cursor: pointer;
   transform: none;
   box-shadow: none;
 }

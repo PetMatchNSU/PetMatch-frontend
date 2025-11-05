@@ -1,0 +1,509 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  font-size: 2rem;
+  color: #50280E;
+  margin-bottom: 10px;
+  flex: 1;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #666;
+}
+
+.form {
+  background: #fff;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.formColumns {
+  display: flex;
+  gap: 30px;
+}
+
+.formColumn {
+  flex: 1;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.label {
+  display: block;
+  margin-right: 15px;
+  margin-bottom: 0;
+  font-weight: 500;
+  color: #50280E;
+  min-width: 150px;
+  padding-top: 8px;
+}
+
+.inputWrapper {
+  flex: 1;
+  width: 100%;
+}
+
+.breedQuestion {
+  align-items: center;
+}
+
+.breedQuestion .inputWrapper {
+  flex: none;
+  width: 200px;
+}
+
+.section {
+  padding: 20px 0;
+  border-top: 1px solid #eee;
+}
+
+.section h3 {
+  color: #50280E;
+  margin-bottom: 20px;
+}
+
+.photoUpload {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.photoPreview {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.photoPreview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removePhoto {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.photoPlaceholder {
+  width: 150px;
+  height: 150px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+}
+
+.uploadButton {
+  padding: 10px 15px;
+  background: #AC7F5E;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+
+.uploadButton:hover {
+  background: #966d52;
+}
+
+.additionalPhotos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.documentSection {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.documentItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.documentLabel {
+  font-weight: 500;
+  color: #50280E;
+  font-size: 14px;
+}
+
+.documentUpload {
+  display: flex;
+  align-items: center;
+}
+
+.documentPreview {
+  position: relative;
+  width: 100%;
+  min-height: 40px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: #f9f9f9;
+}
+
+.documentName {
+  flex: 1;
+  font-size: 14px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 30px;
+}
+
+.removeDocument {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: rgba(255, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.documentPlaceholder {
+  width: 100%;
+  min-height: 40px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9f9f9;
+}
+
+
+@media (min-width: 767px) and (max-width: 1000px) {
+  .container {
+    padding: 15px;
+  }
+  
+  .form {
+    padding: 25px;
+  }
+  
+  .formColumns {
+    gap: 20px;
+  }
+  
+  .formGroup {
+    margin-bottom: 15px;
+  }
+  
+  .label {
+    min-width: 130px;
+  }
+  
+  .photoPreview,
+  .photoPlaceholder {
+    width: 130px;
+    height: 130px;
+  }
+  
+  .section {
+    margin: 25px 0;
+  }
+  
+  .buttons {
+    margin-top: 25px;
+  }
+}
+
+@media (min-width: 415px) and (max-width: 767px) {
+  .container {
+    padding: 12px;
+  }
+  
+  .form {
+    padding: 22px;
+  }
+  
+  .formColumns {
+    gap: 15px;
+  }
+  
+  .formGroup {
+    margin-bottom: 12px;
+  }
+  
+  .label {
+    min-width: 120px;
+  }
+  
+  .photoPreview,
+  .photoPlaceholder {
+    width: 110px;
+    height: 110px;
+  }
+  
+  .section {
+    margin: 20px 0;
+  }
+  
+  .buttons {
+    margin-top: 20px;
+  }
+  
+  .documentPreview {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .documentName {
+    width: 100%;
+    word-break: break-word;
+  }
+
+  .documentItem {
+    gap: 3px;
+  }
+
+  .documentLabel {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 415px) {
+  .container {
+    padding: 8px;
+  }
+  
+  .form {
+    padding: 15px;
+  }
+  
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 0.9rem;
+  }
+  
+  .formColumns {
+    gap: 10px;
+  }
+  
+  .formGroup {
+    margin-bottom: 10px;
+  }
+  
+  .label {
+    min-width: 100px;
+    font-size: 0.9rem;
+  }
+  
+  .photoPreview,
+  .photoPlaceholder {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .uploadButton {
+    font-size: 0.85rem;
+    padding: 8px 12px;
+  }
+  
+  .section {
+    margin: 15px 0;
+    padding: 15px 0;
+  }
+  
+  .documentItem {
+    gap: 5px;
+  }
+  
+  .documentLabel {
+    font-size: 0.9rem;
+  }
+  
+  .documentPreview {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 8px;
+  }
+  
+  .documentName {
+    width: 100%;
+    word-break: break-word;
+    font-size: 0.9rem;
+  }
+  
+  .removeDocument,
+  .removePhoto {
+    font-size: 0.8rem;
+    padding: 2px 5px;
+  }
+  
+  .documentItem {
+    gap: 2px;
+  }
+  
+  .documentLabel {
+    font-size: 0.85rem;
+  }
+  
+  .buttons {
+    margin-top: 15px;
+    gap: 10px;
+  }
+  
+  .modalContent {
+    padding: 20px;
+    margin: 0 10px;
+  }
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+  justify-content: center;
+}
+
+.buttons button:first-child {
+  background: #AC7F5E;
+  border-color: #AC7F5E;
+}
+
+.buttons button:first-child:hover:not(:disabled) {
+  background: #966d52;
+  border-color: #966d52;
+}
+
+.buttons button:first-child:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  cursor: pointer;
+}
+
+.error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.loading {
+  text-align: center;
+  padding: 50px;
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 500px;
+  text-align: center;
+}
+
+.modalButtons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .form {
+    padding: 20px;
+  }
+  
+  .formColumns {
+    flex-direction: column;
+  }
+  
+  .photoPreview,
+  .photoPlaceholder {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .buttons {
+    flex-direction: column;
+  }
+  
+  .formGroup {
+    flex-direction: column;
+  }
+  
+  .label {
+    margin-right: 0;
+    margin-bottom: 8px;
+    min-width: unset;
+    padding-top: 0;
+  }
+}

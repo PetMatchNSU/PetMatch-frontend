@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './index'
 import axios from 'axios'
+import {VITE_API_HOST} from "../config.ts";
 
 interface HelloState {
   response: string | null
@@ -19,8 +20,8 @@ export const fetchHello = createAsyncThunk(
   'hello/fetchHello',
   async (_, { rejectWithValue }) => {
     try {
-      const host = import.meta.env.VITE_API_HOST || 'http://localhost:3000'
-      const response = await axios.get(`${host}/hello`)
+      const host = VITE_API_HOST || 'http://localhost:3000'
+      const response = await axios.get(`${host}/actuator/health`)
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Failed to fetch hello')
