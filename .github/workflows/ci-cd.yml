@@ -1,0 +1,47 @@
+name: Backend CI/CD
+
+on:
+  pull_request:
+    branches: [ '*', 'develop', 'master' ]
+  push:
+    branches: [ 'develop', 'master' ]
+
+jobs:
+  build-and-deploy:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/master')
+    runs-on: deployment
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/petmatch-frontend:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/petmatch-frontend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Deploy to production server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PRODUCTION_HOST }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          port: 22
+          script: |
+            cd /opt/petmatch
+            ./deploy.sh ${{ secrets.DOCKER_USERNAME }}/petmatch-frontend:${{ github.sha }} production
