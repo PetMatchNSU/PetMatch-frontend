@@ -1,6 +1,13 @@
 import axios from 'axios';
+import type { 
+  CityApiResponse 
+} from '../types/city';
+import type { 
+  RegisterRequest,
+  RegistrationResponse, 
+} from '../types/user';
 
-const API_BASE_URL = '/api/v1';
+const API_BASE_URL = 'http://158.160.173.155:8091/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -212,35 +219,95 @@ const mockPets: any[] = [
 
 export const api = {
   // Get cities
-  getCities: async (query: string): Promise<any> => {
-    const response = await apiClient.get('/city', {
-      params: { name: query }
-    });
-    return response.data;
+  getCities: async (name: string): Promise<CityApiResponse> => {
+    try {
+      const response = await apiClient.get('/city', {
+        params: { name: name }
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Get cities error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
   },
 
   // User registration
-  registerUser: async (userData: any): Promise<any> => {
-    const response = await apiClient.post('/user/register', userData);
-    return response.data;
+  registerUser: async (userData: RegisterRequest): Promise<RegistrationResponse> => {
+    try {
+      const requestBody = {
+        email: userData.email,
+        full_name: userData.fullName,
+        password: userData.password,
+        gender: userData.gender,
+        city: userData.city,
+        preferred_time: userData.preferredTime || '',
+        contact_info: {
+          email: userData.contactInfo.email,
+          phone: userData.contactInfo.phone,
+          telegram: userData.contactInfo.telegram,
+          vk: userData.contactInfo.vk
+        },
+        visibility: {
+          email: userData.visibility.email,
+          phone: userData.visibility.phone,
+          telegram: userData.visibility.telegram,
+          vk: userData.visibility.vk
+        }
+      };
+      const response = await apiClient.post<RegistrationResponse>('/user/register', requestBody);
+      return response.data;
+    } catch (error: any) {
+      console.error('User registration error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
   },
 
   // User login
   loginUser: async (credentials: any): Promise<any> => {
-    const response = await apiClient.post('/user/login', credentials);
-    return response.data;
+    try {
+      const response = await apiClient.post('/user/login', credentials);
+      return response.data;
+    } catch (error: any) {
+      console.error('User login error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
   },
 
   // Get user profile
   getUserProfile: async (): Promise<any> => {
-    const response = await apiClient.get('/user/profile');
-    return response.data;
+    try {
+      const response = await apiClient.get('/user/profile');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get user profile error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
   },
 
   // Update user profile
   updateUserProfile: async (profileData: any): Promise<any> => {
-    const response = await apiClient.put('/user/profile', profileData);
-    return response.data;
+    try {
+      const response = await apiClient.put('/user/profile', profileData);
+      return response.data;
+    } catch (error: any) {
+      console.error('Update user profile error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
   },
   // Get animal info (species and goals)
   getAnimalInfo: async (): Promise<any> => {

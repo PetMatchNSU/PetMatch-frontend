@@ -3,6 +3,14 @@ import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { api } from '../services/api';
+import type { 
+  CityLocation, 
+} from '../types/city';
+import type { 
+  RegisterRequest, 
+  ContactInfo, 
+  VisibilitySettings, 
+} from '../types/user';
 import Input, { LabelPosition } from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import LinksBlock from '../components/LinksBlock/LinksBlock';
@@ -56,38 +64,6 @@ interface SelectOption {
   label: string;
 }
 
-interface ContactInfo {
-  email: string;
-  phone: string;
-  telegram: string;
-  vk: string;
-}
-
-interface VisibilitySettings {
-  email: boolean;
-  phone: boolean;
-  telegram: boolean;
-  vk: boolean;
-}
-
-interface RegistrationResponse {
-  accessToken: string;
-  refreshToken: string;
-}
-
-interface CityLocation {
-  region: string;
-  city: string;
-}
-
-interface CityApiResponse {
-  locations: CityLocation[];
-}
-
-interface BadResponse {
-  message: string;
-}
-
 const Registration: React.FC = () => {
   const {
     register,
@@ -130,6 +106,31 @@ const Registration: React.FC = () => {
   });
 
   const formData = watch();
+
+  useEffect(() => {
+    const loadAllCities = async () => {
+      setIsLoadingCities(true);
+      try {
+        const response = await api.getCities('');
+        
+        const options: SelectOption[] = response.locations.map((location: CityLocation) => ({
+          value: `${location.city}, ${location.region}`,
+          label: `${location.city}, ${location.region}`
+        }));
+
+        setAllCities(options);
+        setFilteredCities(options);
+      } catch (error) {
+        console.error('Ошибка при загрузке городов:', error);
+        setAllCities([]);
+        setFilteredCities([]);
+      } finally {
+        setIsLoadingCities(false);
+      }
+    };
+
+    loadAllCities();
+  }, []);
 
   useEffect(() => {
     if (!searchQuery) {
@@ -187,28 +188,18 @@ const Registration: React.FC = () => {
     
     try {
 
-      const result = await api.registerUser({
+      const registrationData: RegisterRequest = {
         email: data.email,
         fullName: data.fullName,
+        password: data.password,
         gender,
-        city: selectedCity?.value,
-        preferredTime,
+        city: selectedCity?.value || '',
+        preferredTime: preferredTime || undefined,
         contactInfo,
         visibility,
-        password: data.password,
-      });
+      };
 
-      console.log('Registration data:', {
-        email: data.email,
-        fullName: data.fullName,
-        gender,
-        city: selectedCity?.value,
-        preferredTime,
-        contactInfo,
-        visibility,
-        password: data.password,
-      });
-
+      const result = await api.registerUser(registrationData);
       setRegistrationSuccess(true);
       
     } catch (error: any) {
