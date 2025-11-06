@@ -237,6 +237,7 @@ const Registration: React.FC = () => {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className={styles.registration__form}>
+          <h1>Регистрация</h1>
           <Input
             label="Email"
             type="email"
@@ -327,6 +328,16 @@ const Registration: React.FC = () => {
           >
             {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться'}
           </Button>
+
+          <div className={styles.registration__login}>
+            <LinksBlock 
+              title="Уже есть аккаунт?"
+              links={[
+                { text: "Войти", to: "/login" }
+              ]}
+              layout = 'horizontal'
+            />
+          </div>
         </form>
     </div>
     </div>

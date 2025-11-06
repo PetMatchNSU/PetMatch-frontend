@@ -8,6 +8,7 @@ interface LinksBlockProps {
     text: string;
     to: string;
   }>;
+  layout?: 'horizontal' | 'vertical'; 
 }
 
 const LinksBlock: React.FC<LinksBlockProps> = ({ 
@@ -15,12 +16,13 @@ const LinksBlock: React.FC<LinksBlockProps> = ({
   links = [
     { text: "Пользовательское соглашение", to: "/user-agreement" },
     { text: "Политика обработки персональных данных", to: "/privacy-policy" }
-  ]
+  ],
+  layout = 'vertical'
 }) => {
   return (
-    <div className={styles.linksBlock}>
+    <div className={`${styles.linksBlock} ${styles[`linksBlock--${layout}`]}`}>
       <div className={styles.title}>{title}</div>
-      <div className={styles.links}>
+      <div className={`${styles.links} ${styles[`links--${layout}`]}`}>
         {links.map((link, index) => (
           <Link 
             key={index}

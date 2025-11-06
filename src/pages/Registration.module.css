@@ -7,15 +7,26 @@
 }
 
 .registration__container {
-  background: transparent;
+  background: #fff;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 500px;
+  max-width: 550px;
 }
 
 .registration__form {
   display: flex;
   flex-direction: column;
 }
+
+
+.registration__login {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
 
 .registration__field {
   display: flex;
@@ -27,6 +38,12 @@
   font-weight: 500;
   color: #333;
   font-size: 14px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #50280E;
+  margin-bottom: 20px;
 }
 
 .registration__gender {
@@ -43,13 +60,6 @@
 
 .registration__submit {
   width: 100%;
-}
-
-
-.registration__login {
-  margin-top: 15px;
-  font-size: 14px;
-  color: #666;
 }
 
 .registration__link {

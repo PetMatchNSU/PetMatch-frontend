@@ -4,7 +4,11 @@ import type {
 } from '../types/city';
 import type { 
   RegisterRequest,
-  RegistrationResponse, 
+  RegistrationResponse,
+  UserContacts,
+  UserProfile,
+  UpdateProfileRequest,
+  VerifyEmailRequest,
 } from '../types/user';
 
 const API_BASE_URL = 'http://158.160.173.155:8091/api/v1';
@@ -235,32 +239,35 @@ export const api = {
   },
 
   // User registration
-  registerUser: async (userData: RegisterRequest): Promise<RegistrationResponse> => {
+  registerUser: async (requestBody: RegisterRequest): Promise<RegistrationResponse> => {
     try {
-      const requestBody = {
-        email: userData.email,
-        full_name: userData.fullName,
-        password: userData.password,
-        gender: userData.gender,
-        city: userData.city,
-        preferred_time: userData.preferredTime || '',
-        contact_info: {
-          email: userData.contactInfo.email,
-          phone: userData.contactInfo.phone,
-          telegram: userData.contactInfo.telegram,
-          vk: userData.contactInfo.vk
-        },
-        visibility: {
-          email: userData.visibility.email,
-          phone: userData.visibility.phone,
-          telegram: userData.visibility.telegram,
-          vk: userData.visibility.vk
-        }
-      };
       const response = await apiClient.post<RegistrationResponse>('/user/register', requestBody);
+      if (response.data.accessToken && response.data.refreshToken) {
+        localStorage.setItem('accessToken', response.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+      }
       return response.data;
     } catch (error: any) {
       console.error('User registration error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // Logout
+  logout: (): void => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  },
+
+  // Verify email
+  verifyEmail: async (verifyData: VerifyEmailRequest): Promise<void> => {
+    try {
+      await apiClient.post('/user/verify-email', verifyData);
+    } catch (error: any) {
+      console.error('Verify email error:', error);
       if (error.response?.data) {
         throw error.response.data;
       }
@@ -283,9 +290,9 @@ export const api = {
   },
 
   // Get user profile
-  getUserProfile: async (): Promise<any> => {
+  getUserProfile: async (): Promise<UserProfile> => {
     try {
-      const response = await apiClient.get('/user/profile');
+      const response = await apiClient.get<UserProfile>('/user/profile');
       return response.data;
     } catch (error: any) {
       console.error('Get user profile error:', error);
@@ -297,7 +304,7 @@ export const api = {
   },
 
   // Update user profile
-  updateUserProfile: async (profileData: any): Promise<any> => {
+  updateUserProfile: async (profileData: UpdateProfileRequest): Promise<void> => {
     try {
       const response = await apiClient.put('/user/profile', profileData);
       return response.data;
@@ -309,6 +316,21 @@ export const api = {
       throw error;
     }
   },
+
+  // Get user contacts
+  getUserContacts: async (): Promise<UserContacts> => {
+    try {
+      const response = await apiClient.get<UserContacts>('/user/contacts');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get user contacts error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
   // Get animal info (species and goals)
   getAnimalInfo: async (): Promise<any> => {
     await delay(500); // Simulate network delay

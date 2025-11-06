@@ -1,6 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import About from './pages/About'
 import Registration from './pages/Registration'
+import Login from './pages/Login'
 import Home from './pages/Home'
 import Pets from './pages/Pets'
 import EditPet from './pages/EditPet'
@@ -26,6 +27,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Registration />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/pets" element={<Pets />} />
           <Route path="/about" element={<About />} />
           <Route path="/animal/update/:id" element={<EditPet />} />

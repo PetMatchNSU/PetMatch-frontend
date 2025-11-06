@@ -103,9 +103,9 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
   };
 
   return (
-    <div className={styles['preferred-time-input']}>
+    <div className={`${styles['preferred-time-input']} ${styles[`preferred-time-input--${labelPosition}`]}`}>
       <div className={styles['preferred-time-input__container']}>
-        {label && <label className={styles['preferred-time-input__label']}>{label}</label>}
+        {label && <label className={`${styles['preferred-time-input__label']} ${styles[`preferred-time-input__label--${labelPosition}`]}`}>{label}</label>}
         
         <div className={styles['preferred-time-input__wrapper']}>
           <div className={styles['preferred-time-input__first-half']}>
