@@ -16,7 +16,7 @@ interface SelectOption {
   label: string;
 }
 
-interface CustomSelectProps extends Omit<ReactSelectProps<SelectOption>, 'labelPosition'> {
+interface CustomSelectProps extends Omit<ReactSelectProps<SelectOption, false>, 'labelPosition'> {
   label?: string;
   labelPosition?: LabelPositionType;
   error?: string;

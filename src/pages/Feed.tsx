@@ -1,5 +1,5 @@
 import React from 'react';
-import AnimalCard from '../components/AnimalCard';
+import FeedAnimalCard from '../components/FeedAnimalCard/FeedAnimalCard';
 import styles from './Feed.module.css';
 
 // Mock data based on API response
@@ -95,13 +95,9 @@ export const Feed: React.FC = () => {
   return (
     <div className={styles.feed}>
       <div className={styles.feed__container}>
-        <div className={styles.feed__header}>
-          <h1 className={styles.feed__title}>Каталог животных</h1>
-          <p className={styles.feed__subtitle}>Найдите себе верного друга</p>
-        </div>
         <div className={styles.feed__cards}>
           {mockAnimals.map(animal => (
-            <AnimalCard key={animal.animalId} animal={animal} />
+            <FeedAnimalCard key={animal.animalId} animal={animal} />
           ))}
         </div>
       </div>
