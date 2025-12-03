@@ -58,7 +58,7 @@
 .preferred-time-input__wrapper {
   display: flex;
   align-items: center;
-  width: calc(100% - 110px); /* Subtract label width and margin */
+  width: 100%;
   border: 1px solid #AC7F5E;
   border-radius: 6px;
   padding: 0.25rem 0.5rem;

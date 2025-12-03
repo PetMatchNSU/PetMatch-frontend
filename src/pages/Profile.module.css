@@ -5,7 +5,7 @@
 }
 
 .profile__container {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
   background-color: white;
   border-radius: 8px;
@@ -17,15 +17,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #AC7F5E;
 }
 
 .profile__header h1 {
-  margin: 0;
-  font-size: 24px;
-  color: #333;
+  font-size: 2rem;
+  color: #50280E;
+  margin-bottom: 0;
 }
 
 .profile__editButton {
