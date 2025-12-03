@@ -1,4 +1,25 @@
-const API_BASE_URL = '/api/v1';
+import axios from 'axios';
+import type { 
+  CityApiResponse 
+} from '../types/city';
+import type { 
+  RegisterRequest,
+  RegistrationResponse,
+  UserContacts,
+  UserProfile,
+  UpdateProfileRequest,
+  VerifyEmailRequest,
+} from '../types/user';
+
+const API_BASE_URL = 'http://158.160.173.155/api/v1';
+
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
 
 // Mock delay function for simulating API calls
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -201,6 +222,115 @@ const mockPets: any[] = [
 ];
 
 export const api = {
+  // Get cities
+  getCities: async (name: string): Promise<CityApiResponse> => {
+    try {
+      const response = await apiClient.get('/city', {
+        params: { name: name }
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('Get cities error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // User registration
+  registerUser: async (requestBody: RegisterRequest): Promise<RegistrationResponse> => {
+    try {
+      const response = await apiClient.post<RegistrationResponse>('/user/register', requestBody);
+      if (response.data.accessToken && response.data.refreshToken) {
+        localStorage.setItem('accessToken', response.data.accessToken);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+      }
+      return response.data;
+    } catch (error: any) {
+      console.error('User registration error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // Logout
+  logout: (): void => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+  },
+
+  // Verify email
+  verifyEmail: async (verifyData: VerifyEmailRequest): Promise<void> => {
+    try {
+      await apiClient.post('/user/verify-email', verifyData);
+    } catch (error: any) {
+      console.error('Verify email error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // User login
+  loginUser: async (credentials: any): Promise<any> => {
+    try {
+      const response = await apiClient.post('/user/login', credentials);
+      return response.data;
+    } catch (error: any) {
+      console.error('User login error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // Get user profile
+  getUserProfile: async (): Promise<UserProfile> => {
+    try {
+      const response = await apiClient.get<UserProfile>('/user/profile');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get user profile error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // Update user profile
+  updateUserProfile: async (profileData: UpdateProfileRequest): Promise<void> => {
+    try {
+      const response = await apiClient.put('/user/profile', profileData);
+      return response.data;
+    } catch (error: any) {
+      console.error('Update user profile error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
+  // Get user contacts
+  getUserContacts: async (): Promise<UserContacts> => {
+    try {
+      const response = await apiClient.get<UserContacts>('/user/contacts');
+      return response.data;
+    } catch (error: any) {
+      console.error('Get user contacts error:', error);
+      if (error.response?.data) {
+        throw error.response.data;
+      }
+      throw error;
+    }
+  },
+
   // Get animal info (species and goals)
   getAnimalInfo: async (): Promise<any> => {
     await delay(500); // Simulate network delay

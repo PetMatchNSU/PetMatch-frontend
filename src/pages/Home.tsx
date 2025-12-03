@@ -259,6 +259,16 @@ const Home: React.FC = () => {
               error={errors.city?.message}
             />
 
+            {/* Select with searchable cities */}
+            <Select
+              label="City (Searchable)"
+              options={cityOptions}
+              value={selectedCity}
+              onChange={setSelectedCity}
+              placeholder="Select your city..."
+              isSearchable={true}
+              error={errors.city?.message}
+            />
             {/* Checkbox Example */}
             <Checkbox 
               label="Согласен с условиями"
@@ -274,12 +284,12 @@ const Home: React.FC = () => {
             />
 
             {/* Disabled Checkbox Example */}
-            <Checkbox
+            <Checkbox 
               label="Принять условия"
               disabled
             />
             {/* Link Block Example */}
-            <LinksBlock
+            <LinksBlock 
               title="Дополнительная информация"
               links={[
                 { text: "Условия использования", to: "/terms" },

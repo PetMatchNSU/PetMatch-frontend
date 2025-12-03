@@ -1,6 +1,18 @@
 .linksBlock {
+  display: flex;
   margin-bottom: 1rem;
   text-align: start;
+  gap: 2px;
+}
+
+.linksBlock--vertical {
+  flex-direction: column;
+}
+
+.linksBlock--horizontal {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 4px;
 }
 
@@ -15,6 +27,7 @@
 .links {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .link {

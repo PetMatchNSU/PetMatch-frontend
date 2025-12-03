@@ -1,15 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './PreferredTimeInput.module.css';
 
+
+export const LabelPosition = {
+  TOP: 'top',
+  LEFT: 'left',
+} as const;
+
+type LabelPositionType = typeof LabelPosition[keyof typeof LabelPosition];
+
 interface PreferredTimeInputProps {
   label?: string;
   value?: string;
+  labelPosition?: LabelPositionType;
   onChange?: (value: string) => void;
   error?: string;
 }
 
 const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
   label = 'Предпочитаемое время связи',
+  labelPosition = LabelPosition.TOP,
   value = '',
   onChange,
   error
@@ -93,9 +103,9 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
   };
 
   return (
-    <div className={styles['preferred-time-input']}>
+    <div className={`${styles['preferred-time-input']} ${styles[`preferred-time-input--${labelPosition}`]}`}>
       <div className={styles['preferred-time-input__container']}>
-        {label && <label className={styles['preferred-time-input__label']}>{label}</label>}
+        {label && <label className={`${styles['preferred-time-input__label']} ${styles[`preferred-time-input__label--${labelPosition}`]}`}>{label}</label>}
         
         <div className={styles['preferred-time-input__wrapper']}>
           <div className={styles['preferred-time-input__first-half']}>

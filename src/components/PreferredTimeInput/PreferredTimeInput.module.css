@@ -4,11 +4,33 @@
   width: 100%;
 }
 
+.preferred-time-input--top {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.preferred-time-input--left {
+  display: flex;
+  align-items: flex-start;
+}
+
 .preferred-time-input__container {
   display: flex;
   align-items: flex-start;
   width: 100%;
 }
+
+.preferred-time-input--top .preferred-time-input__container {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.preferred-time-input--left .preferred-time-input__container {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
 
 .preferred-time-input__label {
   margin-right: 1rem;
@@ -22,6 +44,16 @@
   font-size: 16px;
   color: #50280E;
 }
+
+.preferred-time-input__label--top {
+  margin-right: 0;
+}
+
+.preferred-time-input__label--left {
+  margin-right: 1rem;
+  min-width: 100px;
+}
+
 
 .preferred-time-input__wrapper {
   display: flex;

@@ -1,0 +1,94 @@
+.registration {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.registration__container {
+  background: #fff;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 550px;
+}
+
+.registration__form {
+  display: flex;
+  flex-direction: column;
+}
+
+
+.registration__login {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+
+.registration__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.registration__label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #50280E;
+  margin-bottom: 20px;
+}
+
+.registration__gender {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.registration__genderLabel {
+  font-weight: 500;
+  color: #333;
+  min-width: 20px;
+}
+
+.registration__submit {
+  width: 100%;
+}
+
+.registration__link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.registration__link:hover {
+  text-decoration: underline;
+}
+
+.registration__error {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.registration__success {
+  text-align: center;
+}
+
+.registration__message {
+  background: #d1edff;
+  color: #0c5460;
+  padding: 20px;
+  border-radius: 4px;
+  margin-top: 20px;
+  font-size: 16px;
+}

@@ -1,5 +1,7 @@
 import { Routes, Route, Link } from 'react-router-dom'
 import About from './pages/About'
+import Registration from './pages/Registration'
+import Login from './pages/Login'
 import Home from './pages/Home'
 import Pets from './pages/Pets'
 import { Feed } from './pages/Feed'
@@ -14,7 +16,8 @@ function App() {
         <div className="container navbar-content">
           <Link className="navbar-brand" to="/">PetMatch</Link>
           <div className="nav-links">
-            <Link className="nav-link" to="/">Home</Link>
+            <Link className="nav-link" to="/">Главная</Link>
+            <Link className="nav-link" to="/register">Регистрация</Link>
             <Link className="nav-link" to="/feed">Лента</Link>
             <Link className="nav-link" to="/pets">Мои питомцы</Link>
             <Link className="nav-link" to="/about">About</Link>
@@ -25,6 +28,8 @@ function App() {
       <div className="container">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/register" element={<Registration />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/pets" element={<Pets />} />
           <Route path="/about" element={<About />} />
