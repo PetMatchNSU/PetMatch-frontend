@@ -4,6 +4,7 @@ import Registration from './pages/Registration'
 import Login from './pages/Login'
 import Home from './pages/Home'
 import Pets from './pages/Pets'
+import Profile from './pages/Profile'
 import { Feed } from './pages/Feed'
 import EditPet from './pages/EditPet'
 import './App.css'
@@ -30,6 +31,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/feed" element={<Feed />} />
           <Route path="/pets" element={<Pets />} />
           <Route path="/about" element={<About />} />

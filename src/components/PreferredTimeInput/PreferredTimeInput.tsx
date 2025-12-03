@@ -15,12 +15,14 @@ interface PreferredTimeInputProps {
   labelPosition?: LabelPositionType;
   onChange?: (value: string) => void;
   error?: string;
+  isDisabled?: boolean;
 }
 
 const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
   label = 'Предпочитаемое время связи',
   labelPosition = LabelPosition.TOP,
   value = '',
+  isDisabled = false,
   onChange,
   error
 }) => {
@@ -60,6 +62,11 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
     }
     
     return '';
+  };
+
+  const customStyles = {
+    backgroundColor: isDisabled ? '#f5f5f5' : '#fff',
+    cursor: isDisabled ? 'not-allowed' : 'default'
   };
 
   // Handle input change with masking
@@ -107,7 +114,7 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
       <div className={styles['preferred-time-input__container']}>
         {label && <label className={`${styles['preferred-time-input__label']} ${styles[`preferred-time-input__label--${labelPosition}`]}`}>{label}</label>}
         
-        <div className={styles['preferred-time-input__wrapper']}>
+        <div className={styles['preferred-time-input__wrapper']} style={customStyles}>
           <div className={styles['preferred-time-input__first-half']}>
             <span className={styles['preferred-time-input__prefix']}>с</span>
             <div className={styles['preferred-time-input__time-wrapper']}>
@@ -118,6 +125,7 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
                 onChange={handleFromTimeChange}
                 onKeyDown={(e) => handleKeyDown(e, toInputRef as React.RefObject<HTMLInputElement>)}
                 placeholder="__:__"
+                disabled={isDisabled}
                 maxLength={5}
                 className={styles['preferred-time-input__time']}
               />
@@ -134,6 +142,7 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
                 onChange={handleToTimeChange}
                 onKeyDown={(e) => handleKeyDown(e)}
                 placeholder="__:__"
+                disabled={isDisabled}
                 maxLength={5}
                 className={styles['preferred-time-input__time']}
               />

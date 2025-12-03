@@ -23,6 +23,21 @@ export interface VisibilitySettings {
   vk: boolean;
 }
 
+export interface UserProfile {
+  id: string;
+  email: string;
+  fullName: string;
+  gender: 'male' | 'female';
+  city: string;
+  preferredTime?: string;
+  contactInfo: ContactInfo;
+  visibility: VisibilitySettings;
+  status: 'active' | 'blocked';
+  comment?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface RegistrationResponse {
   accessToken: string;
   refreshToken: string;
