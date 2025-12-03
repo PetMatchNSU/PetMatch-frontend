@@ -30,6 +30,19 @@ export interface RegistrationResponse {
 
 export type ReviewStatus = 'ON_CHECKING' | 'OK' | 'BLOCKED';
 
+export type ContactType = 'email' | 'phone' | 'telegram' | 'vk';
+
+export interface ContactInfoItem {
+  type: ContactType;
+  contact: string;
+  isVisible: boolean;
+}
+
+export interface BondTime {
+  day: string;
+  timeRange: string;
+}
+
 export interface UserProfile {
   fullName: string;
   gender: 'M' | 'F';
