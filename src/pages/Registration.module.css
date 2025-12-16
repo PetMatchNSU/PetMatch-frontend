@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   padding: 20px;
+  background-color: #FBF8F3;
 }
 
 .registration__container {
@@ -63,12 +64,22 @@ h1 {
 }
 
 .registration__link {
-  color: #007bff;
+  color: #50280E;
   text-decoration: none;
 }
 
 .registration__link:hover {
+  color: #AC7F5E;
   text-decoration: underline;
+}
+
+.registration__form a {
+  color: #50280E;
+  text-decoration: underline;
+}
+
+.registration__form a:hover {
+  color: #AC7F5E;
 }
 
 .registration__error {

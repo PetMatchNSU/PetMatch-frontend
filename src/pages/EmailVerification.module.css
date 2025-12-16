@@ -1,0 +1,58 @@
+/**
+ * Email Verification Page styles - БЭМ методология
+ */
+
+.email-verification {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.email-verification__container {
+  max-width: 600px;
+  width: 100%;
+  padding: 40px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.email-verification__content {
+  text-align: center;
+}
+
+.email-verification__title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.email-verification__message {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+.email-verification__error {
+  font-size: 16px;
+  color: #d32f2f;
+  background: #ffebee;
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.email-verification__actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.email-verification__button {
+  min-width: 250px;
+}

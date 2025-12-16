@@ -1,41 +1,103 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Toggle from '../Toggle/Toggle';
 import styles from './RegistrationTable.module.css';
+import type { ContactInfo } from '../../types/auth';
 
-interface ContactInfo {
-  email: string;
-  phone: string;
-  telegram: string;
-  vk: string;
-}
+type ContactType = 'EMAIL' | 'PHONE' | 'TELEGRAM' | 'VK';
 
-interface VisibilitySettings {
-  email: boolean;
-  phone: boolean;
-  telegram: boolean;
-  vk: boolean;
+interface LocalContactState {
+  email: { contact: string; visible: boolean };
+  phone: { contact: string; visible: boolean };
+  telegram: { contact: string; visible: boolean };
+  vk: { contact: string; visible: boolean };
 }
 
 interface RegistrationTableProps {
-  onContactInfoChange: (contactInfo: ContactInfo) => void;
-  onVisibilityChange: (visibility: VisibilitySettings) => void;
-  contactInfo: ContactInfo;
-  visibility: VisibilitySettings;
+  contactInfo: ContactInfo[];
+  onChange: (contacts: ContactInfo[]) => void;
+  error?: string;
 }
 
+const contactTypeMap: Record<string, ContactType> = {
+  email: 'EMAIL',
+  phone: 'PHONE',
+  telegram: 'TELEGRAM',
+  vk: 'VK',
+};
+
+const PREFIXES = {
+  phone: '+7',
+  telegram: '@',
+  vk: 'https://vk.com/',
+};
+
 const RegistrationTable: React.FC<RegistrationTableProps> = ({
-  onContactInfoChange,
-  onVisibilityChange,
   contactInfo,
-  visibility
+  onChange,
+  error,
 }) => {
-  const handleInputChange = (field: keyof ContactInfo, value: string) => {
-    onContactInfoChange({ ...contactInfo, [field]: value });
+  const [localState, setLocalState] = useState<LocalContactState>({
+    email: { contact: '', visible: true },
+    phone: { contact: '', visible: false },
+    telegram: { contact: '', visible: false },
+    vk: { contact: '', visible: false },
+  });
+
+  // Синхронизация с входящим contactInfo
+  useEffect(() => {
+    const newState: LocalContactState = {
+      email: { contact: '', visible: true },
+      phone: { contact: '', visible: false },
+      telegram: { contact: '', visible: false },
+      vk: { contact: '', visible: false },
+    };
+
+    contactInfo.forEach((item) => {
+      const key = item.type.toLowerCase() as keyof LocalContactState;
+      if (newState[key]) {
+        newState[key] = {
+          contact: item.contact,
+          visible: key === 'email' ? true : item.visible
+        };
+      }
+    });
+
+    setLocalState(newState);
+  }, [contactInfo]);
+
+  const convertToContactInfoArray = (state: LocalContactState): ContactInfo[] => {
+    const result: ContactInfo[] = [];
+    (Object.keys(state) as Array<keyof LocalContactState>).forEach((key) => {
+      if (state[key].contact) {
+        result.push({
+          type: contactTypeMap[key],
+          contact: state[key].contact,
+          visible: key === 'email' ? true : state[key].visible,
+        });
+      }
+    });
+    return result;
   };
 
-  const handleToggleChange = (field: keyof VisibilitySettings) => 
+  const handleInputChange = (field: keyof LocalContactState, value: string) => {
+    const newState = {
+      ...localState,
+      [field]: { ...localState[field], contact: value },
+    };
+    setLocalState(newState);
+    onChange(convertToContactInfoArray(newState));
+  };
+
+  const handleToggleChange = (field: keyof LocalContactState) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onVisibilityChange({ ...visibility, [field]: e.target.checked });
+      if (field === 'email') return;
+
+      const newState = {
+        ...localState,
+        [field]: { ...localState[field], visible: e.target.checked },
+      };
+      setLocalState(newState);
+      onChange(convertToContactInfoArray(newState));
     };
 
   return (
@@ -55,7 +117,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
               <input
                 type="email"
                 placeholder="Введите email"
-                value={contactInfo.email}
+                value={localState.email.contact}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 className={styles.tableInput}
               />
@@ -63,8 +125,9 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
             <td>
               <div className={styles.toggleWrapper}>
                 <Toggle
-                  checked={visibility.email}
-                  onChange={handleToggleChange('email')}
+                  checked={true}
+                  onChange={() => {}}
+                  disabled={true}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
@@ -73,18 +136,21 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
           <tr>
             <td>Телефон</td>
             <td>
-              <input
-                type="tel"
-                placeholder="Введите номер телефона"
-                value={contactInfo.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className={styles.tableInput}
-              />
+              <div className={styles.inputWithPrefix}>
+                <span className={styles.prefix}>{PREFIXES.phone}</span>
+                <input
+                  type="tel"
+                  placeholder="9001234567"
+                  value={localState.phone.contact}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className={styles.tableInputWithPrefix}
+                />
+              </div>
             </td>
             <td>
               <div className={styles.toggleWrapper}>
                 <Toggle
-                  checked={visibility.phone}
+                  checked={localState.phone.visible}
                   onChange={handleToggleChange('phone')}
                   wrapperClassName={styles.noMargin}
                 />
@@ -94,17 +160,20 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
           <tr>
             <td>Telegram</td>
             <td>
-              <input
-                placeholder="Введите логин Telegram"
-                value={contactInfo.telegram}
-                onChange={(e) => handleInputChange('telegram', e.target.value)}
-                className={styles.tableInput}
-              />
+              <div className={styles.inputWithPrefix}>
+                <span className={styles.prefix}>{PREFIXES.telegram}</span>
+                <input
+                  placeholder="username"
+                  value={localState.telegram.contact}
+                  onChange={(e) => handleInputChange('telegram', e.target.value)}
+                  className={styles.tableInputWithPrefix}
+                />
+              </div>
             </td>
             <td>
               <div className={styles.toggleWrapper}>
                 <Toggle
-                  checked={visibility.telegram}
+                  checked={localState.telegram.visible}
                   onChange={handleToggleChange('telegram')}
                   wrapperClassName={styles.noMargin}
                 />
@@ -114,17 +183,20 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
           <tr>
             <td>VK</td>
             <td>
-              <input
-                placeholder="Введите логин VK"
-                value={contactInfo.vk}
-                onChange={(e) => handleInputChange('vk', e.target.value)}
-                className={styles.tableInput}
-              />
+              <div className={styles.inputWithPrefix}>
+                <span className={styles.prefix}>{PREFIXES.vk}</span>
+                <input
+                  placeholder="id или username"
+                  value={localState.vk.contact}
+                  onChange={(e) => handleInputChange('vk', e.target.value)}
+                  className={styles.tableInputWithPrefix}
+                />
+              </div>
             </td>
             <td>
               <div className={styles.toggleWrapper}>
                 <Toggle
-                  checked={visibility.vk}
+                  checked={localState.vk.visible}
                   onChange={handleToggleChange('vk')}
                   wrapperClassName={styles.noMargin}
                 />
@@ -133,6 +205,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
           </tr>
         </tbody>
       </table>
+      {error && <div className={styles.error}>{error}</div>}
     </div>
   );
 };
