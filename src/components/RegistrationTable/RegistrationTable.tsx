@@ -21,13 +21,15 @@ interface RegistrationTableProps {
   onVisibilityChange: (visibility: VisibilitySettings) => void;
   contactInfo: ContactInfo;
   visibility: VisibilitySettings;
+  disabled?: boolean;
 }
 
 const RegistrationTable: React.FC<RegistrationTableProps> = ({
   onContactInfoChange,
   onVisibilityChange,
   contactInfo,
-  visibility
+  visibility,
+  disabled = false
 }) => {
   const handleInputChange = (field: keyof ContactInfo, value: string) => {
     onContactInfoChange({ ...contactInfo, [field]: value });
@@ -57,6 +59,8 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 placeholder="Введите email"
                 value={contactInfo.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
+                readOnly={disabled}
+                disabled={disabled}
                 className={styles.tableInput}
               />
             </td>
@@ -65,6 +69,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 <Toggle
                   checked={visibility.email}
                   onChange={handleToggleChange('email')}
+                  disabled={disabled}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
@@ -78,6 +83,8 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 placeholder="Введите номер телефона"
                 value={contactInfo.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
+                readOnly={disabled}
+                disabled={disabled}
                 className={styles.tableInput}
               />
             </td>
@@ -86,6 +93,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 <Toggle
                   checked={visibility.phone}
                   onChange={handleToggleChange('phone')}
+                  disabled={disabled}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
@@ -98,6 +106,8 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 placeholder="Введите логин Telegram"
                 value={contactInfo.telegram}
                 onChange={(e) => handleInputChange('telegram', e.target.value)}
+                readOnly={disabled}
+                disabled={disabled}
                 className={styles.tableInput}
               />
             </td>
@@ -106,6 +116,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 <Toggle
                   checked={visibility.telegram}
                   onChange={handleToggleChange('telegram')}
+                  disabled={disabled}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
@@ -118,6 +129,8 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 placeholder="Введите логин VK"
                 value={contactInfo.vk}
                 onChange={(e) => handleInputChange('vk', e.target.value)}
+                readOnly={disabled}
+                disabled={disabled}
                 className={styles.tableInput}
               />
             </td>
@@ -127,6 +140,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                   checked={visibility.vk}
                   onChange={handleToggleChange('vk')}
                   wrapperClassName={styles.noMargin}
+                  disabled={disabled}
                 />
               </div>
             </td>

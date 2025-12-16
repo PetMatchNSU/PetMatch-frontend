@@ -363,6 +363,7 @@ const Profile: React.FC = () => {
               onVisibilityChange={setVisibility}
               contactInfo={contactInfo}
               visibility={visibility}
+              disabled={!isEditing}
             />
           </div>
 

@@ -85,7 +85,6 @@ const Registration: React.FC = () => {
   const [selectedCity, setSelectedCity] = useState<SingleValue<SelectOption>>(null);
   const [preferredTime, setPreferredTime] = useState<string>('');
   const [agreedToTerms, setAgreedToTerms] = useState<boolean>(false);
-  const [cityOptions, setCityOptions] = useState<SelectOption[]>([]);
   const [isLoadingCities, setIsLoadingCities] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [allCities, setAllCities] = useState<SelectOption[]>([]);
