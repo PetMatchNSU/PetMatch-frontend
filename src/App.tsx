@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import About from './pages/About'
 import Registration from './pages/Registration'
 import Login from './pages/Login'
@@ -6,26 +6,15 @@ import Home from './pages/Home'
 import Pets from './pages/Pets'
 import { Feed } from './pages/Feed'
 import EditPet from './pages/EditPet'
+import Navigation from './components/Navigation/Navigation'
 import './App.css'
 
 function App() {
-
   return (
     <div className="App">
-      <nav className="navbar">
-        <div className="container navbar-content">
-          <Link className="navbar-brand" to="/">PetMatch</Link>
-          <div className="nav-links">
-            <Link className="nav-link" to="/">Главная</Link>
-            <Link className="nav-link" to="/register">Регистрация</Link>
-            <Link className="nav-link" to="/feed">Лента</Link>
-            <Link className="nav-link" to="/pets">Мои питомцы</Link>
-            <Link className="nav-link" to="/about">About</Link>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
       
-      <div className="container">
+      <div className="container main-content">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Registration />} />
