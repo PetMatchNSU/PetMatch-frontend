@@ -57,6 +57,15 @@
   background-color: rgba(172, 127, 94, 0.1);
 }
 
+.navLink:hover::after {
+  width: 80%;
+}
+
+.navLinkActive {
+  color: #50280E;
+  font-weight: 400;
+}
+
 .navLink::after {
   content: '';
   position: absolute;
@@ -65,18 +74,23 @@
   transform: translateX(-50%);
   width: 0;
   height: 2px;
-  background-color: #AC7F5E;
+  background-color: #7a3c1a;
   transition: width 0.3s ease;
 }
 
-.navLink:hover::after {
-  width: 80%;
+.navLinkActive::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 90%;
+  height: 2px;
+  background-color: #50280E;
+  transition: width 0.3s ease;
 }
 
-.navLinkActive {
-  color: #7a3c1a;
-  font-weight: 400;
-  background-color: rgba(172, 127, 94, 0.1);
+.navLinkActive:hover::after {
+  background-color: #7a3c1a;
 }
 
 .mobileHeader {

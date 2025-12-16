@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import styles from './Navigation.module.css';
 import Logo from '../Logo/Logo';
 
@@ -37,30 +37,47 @@ const Navigation: React.FC<NavigationProps> = ({
       {isDesktop ? (
         <nav className={styles.navbar}>
           <div className={`container ${styles.navbarContent}`}>
-            <Link 
+            <NavLink 
               className={styles.navbarBrand} 
               to="/" 
               onClick={() => setIsMobileMenuOpen(false)}
             >
-               <Logo />
-            </Link>
+              <Logo />
+            </NavLink>
             <div className={styles.navLinks}>
               {navItems.map((item) => (
-                <Link 
+                <NavLink 
                   key={item.id} 
-                  className={styles.navLink} 
+                  className={({ isActive }) => 
+                    `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+                  }
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
+                  end={item.path === '/'}
                 >
                   {item.label}
-                </Link>
+                </NavLink>
               ))}
             </div>
             <div className={styles.navLinks}>
               {isAuthenticated ? (
-                <Link className={styles.navLink} to="/profile">Профиль</Link>
+                <NavLink 
+                  className={({ isActive }) => 
+                    `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+                  }
+                  to="/profile"
+                >
+                  Профиль
+                </NavLink>
               ) : (
-                <Link className={styles.navLink} to="/login">Вход / регистрация</Link>
+                <NavLink 
+                  className={({ isActive }) => 
+                    `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+                  }
+                  to="/login"
+                >
+                  Вход / регистрация
+                </NavLink>
               )}
             </div>
           </div>
@@ -77,13 +94,13 @@ const Navigation: React.FC<NavigationProps> = ({
               <span className={styles.hamburgerLine}></span>
               <span className={styles.hamburgerLine}></span>
             </button>
-            <Link 
+            <NavLink 
               className={styles.mobileLogo} 
               to="/" 
               onClick={() => setIsMobileMenuOpen(false)}
             >
-               <Logo variant='icon'/>
-            </Link>
+              <Logo variant='icon'/>
+            </NavLink>
           </div>
           
           <div className={`${styles.mobileSidebar} ${isMobileMenuOpen ? styles.open : ''}`}>
@@ -99,23 +116,28 @@ const Navigation: React.FC<NavigationProps> = ({
             <ul className={styles.sidebarMenu}>
               {navItems.map((item) => (
                 <li key={item.id} className={styles.sidebarItem}>
-                  <Link 
-                    className={styles.sidebarLink}
+                  <NavLink 
+                    className={({ isActive }) => 
+                      `${styles.sidebarLink} ${isActive ? styles.sidebarLinkActive : ''}`
+                    }
                     to={item.path}
                     onClick={() => setIsMobileMenuOpen(false)}
+                    end={item.path === '/'}
                   >
                     {item.label}
-                  </Link>
+                  </NavLink>
                 </li>
               ))}
               <li className={styles.sidebarItem}>
-                <Link 
-                  className={styles.sidebarLink}
+                <NavLink 
+                  className={({ isActive }) => 
+                    `${styles.sidebarLink} ${isActive ? styles.sidebarLinkActive : ''}`
+                  }
                   to="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {isAuthenticated ? 'Профиль' : 'Вход / регистрация'}
-                </Link>
+                </NavLink>
               </li>
             </ul>
           </div>
