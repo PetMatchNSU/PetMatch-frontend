@@ -97,10 +97,10 @@ export const useAuth = () => {
       if (!result.user.isEmailVerified) {
         return { success: true, emailVerified: false };
       }
-
+      
       // Перенаправляем на страницу, с которой пришел пользователь, или на главную
-      const from = (location.state as { from?: string })?.from || '/';
-      navigate(from, { replace: true });
+      // const from = (location.state as { from?: string })?.from || '/';
+      navigate('/feed', { replace: true });
 
       return { success: true, emailVerified: true };
     } catch (error: any) {
