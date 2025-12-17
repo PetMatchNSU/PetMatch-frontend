@@ -131,7 +131,6 @@ export const useAuth = () => {
         city: userData.city,
       }));
 
-      // Не редиректим - нужно подтвердить email
       return { success: true, emailVerified: result.user.isEmailVerified };
     } catch (error: any) {
       console.error('Registration error:', error);

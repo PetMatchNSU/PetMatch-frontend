@@ -56,14 +56,17 @@ const Login: React.FC = () => {
     setServerError(null);
 
     const result = await login(data);
-
     if (!result.success) {
       setServerError(result.error || 'Ошибка авторизации');
       return;
     }
-
+    console.log(result);
     if (result.success) {
-      navigate('/feed');
+      if (result?.user?.isEmailVerified) {
+        navigate('/feed');
+      } else {
+        navigate('/verify-email');
+      }
     }
   };
 
