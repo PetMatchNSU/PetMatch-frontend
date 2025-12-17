@@ -11,7 +11,7 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   user: {
-    isEmailVerified: boolean;
+    emailVerified: boolean;
   };
 }
 
@@ -43,7 +43,7 @@ export interface RegisterResponse {
   accessToken: string;
   refreshToken: string;
   user: {
-    isEmailVerified: boolean;
+    emailVerified: boolean;
   };
 }
 
@@ -86,7 +86,7 @@ export interface ApiError {
 
 export interface User {
   email: string;
-  isEmailVerified: boolean;
+  emailVerified: boolean;
   firstName?: string;
   secondName?: string;
   middleName?: string;

@@ -79,7 +79,7 @@ export interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   user: {
-    isEmailVerified: boolean;
+    emailVerified: boolean;
   };
 }
 

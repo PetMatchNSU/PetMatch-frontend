@@ -8,5 +8,5 @@ import type { RootState } from './index';
 export const selectAuth = (state: RootState) => state.auth;
 export const selectUser = (state: RootState) => state.auth.user;
 export const selectIsAuthenticated = (state: RootState) => state.auth.isAuthenticated;
-export const selectIsEmailVerified = (state: RootState) => state.auth.isEmailVerified;
+export const selectEmailVerified = (state: RootState) => state.auth.emailVerified;
 export const selectIsInitialized = (state: RootState) => state.auth.isInitialized;
