@@ -149,3 +149,20 @@
   font-size: 0.875rem;
   color: #dc3545;
 }
+
+.inputCell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inputError {
+  background-color: #fff5f5;
+}
+
+.fieldError {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: #dc3545;
+  background-color: #fff;
+}

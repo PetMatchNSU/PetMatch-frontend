@@ -55,7 +55,7 @@ export const Registration: React.FC = () => {
       email: '',
       firstName: '',
       secondName: '',
-      lastName: '',
+      middleName: '',
       password: '',
       confirmPassword: '',
       gender: 'M' as 'M' | 'F',
@@ -69,9 +69,22 @@ export const Registration: React.FC = () => {
 
   const genderValue = watch('gender');
 
+  // Префиксы для контактов
+  const CONTACT_PREFIXES: Record<string, string> = {
+    PHONE: '+7',
+    TELEGRAM: '@',
+    VK: 'https://vk.com/',
+  };
+
   const onSubmit = async (data: any) => {
     setServerError(null);
     setShowEmailVerification(false);
+
+    // Добавляем префиксы к контактам
+    const contactInfoWithPrefixes = data.contactInfo.map((contact: ContactInfo) => ({
+      ...contact,
+      contact: (CONTACT_PREFIXES[contact.type] || '') + contact.contact,
+    }));
 
     // Формируем данные для отправки
     const registrationData: RegisterRequest = {
@@ -79,12 +92,12 @@ export const Registration: React.FC = () => {
       password: data.password,
       firstName: data.firstName,
       secondName: data.secondName,
-      lastName: data.lastName,
+      middleName: data.middleName || undefined,
       gender: data.gender,
       region: data.region,
       city: data.city,
       bondTime: data.bondTime,
-      contactInfo: data.contactInfo,
+      contactInfo: contactInfoWithPrefixes,
     };
 
     const result = await registerUser(registrationData);
@@ -117,9 +130,13 @@ export const Registration: React.FC = () => {
     setValue('bondTime', times, { shouldValidate: true });
   };
 
+  // Состояние валидности таблицы контактов
+  const [isContactInfoValid, setIsContactInfoValid] = useState(false);
+
   // Обработчик изменения контактной информации
-  const handleContactInfoChange = (contacts: ContactInfo[]) => {
+  const handleContactInfoChange = (contacts: ContactInfo[], isValid: boolean) => {
     setContactInfo(contacts);
+    setIsContactInfoValid(isValid);
     setValue('contactInfo', contacts, { shouldValidate: true });
   };
 
@@ -181,8 +198,8 @@ export const Registration: React.FC = () => {
             label="Отчество"
             type="text"
             placeholder="Введите ваше отчество"
-            {...register('lastName')}
-            error={errors.lastName?.message}
+            {...register('middleName')}
+            error={errors.middleName?.message}
           />
 
           {/* Пол */}
@@ -283,7 +300,7 @@ export const Registration: React.FC = () => {
           <Button
             type="submit"
             size="large"
-            disabled={!isValid || isRegisterLoading}
+            disabled={!isValid || !isContactInfoValid || isRegisterLoading}
             className={styles.registration__submit}
           >
             {isRegisterLoading ? 'Регистрация...' : 'Зарегистрироваться'}

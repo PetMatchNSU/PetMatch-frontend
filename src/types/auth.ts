@@ -20,7 +20,7 @@ export interface RegisterRequest {
   password: string;
   firstName: string;
   secondName: string;
-  lastName: string;
+  middleName?: string;
   gender: 'M' | 'F';
   region: string;
   city: string;
@@ -89,7 +89,7 @@ export interface User {
   isEmailVerified: boolean;
   firstName?: string;
   secondName?: string;
-  lastName?: string;
+  middleName?: string;
   gender?: 'M' | 'F';
   region?: string;
   city?: string;

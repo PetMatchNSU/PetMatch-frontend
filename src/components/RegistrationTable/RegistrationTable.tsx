@@ -12,9 +12,14 @@ interface LocalContactState {
   vk: { contact: string; visible: boolean };
 }
 
+interface ValidationErrors {
+  email?: string;
+  phone?: string;
+}
+
 interface RegistrationTableProps {
   contactInfo: ContactInfo[];
-  onChange: (contacts: ContactInfo[]) => void;
+  onChange: (contacts: ContactInfo[], isValid: boolean) => void;
   error?: string;
 }
 
@@ -42,6 +47,50 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
     telegram: { contact: '', visible: false },
     vk: { contact: '', visible: false },
   });
+
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [touched, setTouched] = useState<{ email: boolean; phone: boolean }>({
+    email: false,
+    phone: false,
+  });
+
+  // Валидация email
+  const validateEmail = (email: string): string | undefined => {
+    if (!email.trim()) {
+      return 'Email обязателен для заполнения';
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return 'Введите корректный email';
+    }
+    return undefined;
+  };
+
+  // Валидация телефона (10 цифр после +7)
+  const validatePhone = (phone: string): string | undefined => {
+    if (!phone) {
+      return undefined; // Телефон не обязателен
+    }
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (digitsOnly.length !== 10) {
+      return 'Номер телефона должен содержать 10 цифр';
+    }
+    return undefined;
+  };
+
+  // Проверка валидности всей формы
+  const validate = (state: LocalContactState): { errors: ValidationErrors; isValid: boolean } => {
+    const errors: ValidationErrors = {};
+
+    const emailError = validateEmail(state.email.contact);
+    if (emailError) errors.email = emailError;
+
+    const phoneError = validatePhone(state.phone.contact);
+    if (phoneError) errors.phone = phoneError;
+
+    const isValid = !emailError && !phoneError;
+    return { errors, isValid };
+  };
 
   // Синхронизация с входящим contactInfo
   useEffect(() => {
@@ -85,7 +134,17 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
       [field]: { ...localState[field], contact: value },
     };
     setLocalState(newState);
-    onChange(convertToContactInfoArray(newState));
+
+    // Валидируем и передаём результат наверх
+    const { errors, isValid } = validate(newState);
+    setValidationErrors(errors);
+    onChange(convertToContactInfoArray(newState), isValid);
+  };
+
+  const handleBlur = (field: 'email' | 'phone') => {
+    setTouched((prev) => ({ ...prev, [field]: true }));
+    const { errors } = validate(localState);
+    setValidationErrors(errors);
   };
 
   const handleToggleChange = (field: keyof LocalContactState) =>
@@ -97,7 +156,8 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
         [field]: { ...localState[field], visible: e.target.checked },
       };
       setLocalState(newState);
-      onChange(convertToContactInfoArray(newState));
+      const { isValid } = validate(newState);
+      onChange(convertToContactInfoArray(newState), isValid);
     };
 
   return (
@@ -114,13 +174,19 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
           <tr>
             <td>Email</td>
             <td>
-              <input
-                type="email"
-                placeholder="Введите email"
-                value={localState.email.contact}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className={styles.tableInput}
-              />
+              <div className={styles.inputCell}>
+                <input
+                  type="email"
+                  placeholder="Введите email"
+                  value={localState.email.contact}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  onBlur={() => handleBlur('email')}
+                  className={`${styles.tableInput} ${touched.email && validationErrors.email ? styles.inputError : ''}`}
+                />
+                {touched.email && validationErrors.email && (
+                  <div className={styles.fieldError}>{validationErrors.email}</div>
+                )}
+              </div>
             </td>
             <td>
               <div className={styles.toggleWrapper}>
@@ -136,15 +202,21 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
           <tr>
             <td>Телефон</td>
             <td>
-              <div className={styles.inputWithPrefix}>
-                <span className={styles.prefix}>{PREFIXES.phone}</span>
-                <input
-                  type="tel"
-                  placeholder="9001234567"
-                  value={localState.phone.contact}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className={styles.tableInputWithPrefix}
-                />
+              <div className={styles.inputCell}>
+                <div className={styles.inputWithPrefix}>
+                  <span className={styles.prefix}>{PREFIXES.phone}</span>
+                  <input
+                    type="tel"
+                    placeholder="9001234567"
+                    value={localState.phone.contact}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    onBlur={() => handleBlur('phone')}
+                    className={`${styles.tableInputWithPrefix} ${touched.phone && validationErrors.phone ? styles.inputError : ''}`}
+                  />
+                </div>
+                {touched.phone && validationErrors.phone && (
+                  <div className={styles.fieldError}>{validationErrors.phone}</div>
+                )}
               </div>
             </td>
             <td>
