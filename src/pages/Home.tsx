@@ -14,6 +14,7 @@ import LinksBlock from '../components/LinksBlock';
 import Toggle from '../components/Toggle/Toggle';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
+import type { BondTime, ContactInfo as AuthContactInfo } from '../types/auth';
 import type { SingleValue, MultiValue, ActionMeta } from 'react-select';
 import axios from 'axios';
 import styles from './Home.module.css';
@@ -85,16 +86,11 @@ const Home: React.FC = () => {
   const [errorCheckboxState, setErrorCheckboxState] = React.useState<boolean>(false);
   
   // State for preferred contact time
-  const [preferredTime, setPreferredTime] = React.useState<string>('');
-  
+  const [preferredTime, setPreferredTime] = React.useState<BondTime[]>([]);
+
   // State for contact information table
-  const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    email: '',
-    phone: '',
-    telegram: '',
-    vk: ''
-  });
-  
+  const [tableContactInfo, setTableContactInfo] = useState<AuthContactInfo[]>([]);
+
   const [visibility, setVisibility] = useState<VisibilitySettings>({
     email: false,
     phone: false,
@@ -134,7 +130,7 @@ const Home: React.FC = () => {
         ...data,
         city: (selectedCity as SingleValue<SelectOption>)?.value,
         preferredTime,
-        contactInfo,
+        contactInfo: tableContactInfo,
         visibility
       });
       console.log('Form submitted successfully:', response.data);
@@ -239,13 +235,11 @@ const Home: React.FC = () => {
               value={preferredTime}
               onChange={setPreferredTime}
             />
-            
+
             {/* Registration Table */}
             <RegistrationTable
-              onContactInfoChange={setContactInfo}
-              onVisibilityChange={setVisibility}
-              contactInfo={contactInfo}
-              visibility={visibility}
+              contactInfo={tableContactInfo}
+              onChange={(contacts, _isValid) => setTableContactInfo(contacts)}
             />
             
             {/* Select with searchable cities */}

@@ -226,7 +226,7 @@ export const Registration: React.FC = () => {
             options={cities}
             value={selectedCity}
             inputValue={cityInputValue}
-            onChange={handleCityChange}
+            onChange={(newValue) => handleCityChange(newValue as SingleValue<CityOption>)}
             onInputChange={(value, actionMeta) => {
               if (actionMeta.action === 'input-change') {
                 setCityInputValue(value);
