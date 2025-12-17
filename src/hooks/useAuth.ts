@@ -125,7 +125,7 @@ export const useAuth = () => {
         isEmailVerified: result.user.isEmailVerified,
         firstName: userData.firstName,
         secondName: userData.secondName,
-        lastName: userData.lastName,
+        middleName: userData.middleName,
         gender: userData.gender,
         region: userData.region,
         city: userData.city,

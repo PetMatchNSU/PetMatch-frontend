@@ -106,7 +106,7 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
     // Добавляем новый слот если последний заполнен и не достигнут лимит
     const lastSlot = trimmedSlots[trimmedSlots.length - 1];
     if (isSlotComplete(lastSlot) && !lastSlot.error && trimmedSlots.length < MAX_INTERVALS) {
-      trimmedSlots.push({ bondTimeStart: '', bondTimeEnd: '' });
+      trimmedSlots.push({ bondTimeStart: '', bondTimeEnd: '', error: undefined });
     }
 
     setSlots(trimmedSlots);
