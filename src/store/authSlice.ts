@@ -11,14 +11,14 @@ import { tokenManager } from '../utils/tokenManager';
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  isEmailVerified: boolean;
+  emailVerified: boolean;
   isInitialized: boolean; // Флаг для проверки, что приложение инициализировано
 }
 
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isEmailVerified: false,
+  emailVerified: false,
   isInitialized: false,
 };
 
@@ -30,14 +30,14 @@ const authSlice = createSlice({
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
       state.isAuthenticated = true;
-      state.isEmailVerified = action.payload.isEmailVerified;
+      state.emailVerified = action.payload.emailVerified;
     },
 
     // Установить статус верификации email
     setEmailVerified: (state, action: PayloadAction<boolean>) => {
-      state.isEmailVerified = action.payload;
+      state.emailVerified = action.payload;
       if (state.user) {
-        state.user.isEmailVerified = action.payload;
+        state.user.emailVerified = action.payload;
       }
     },
 
@@ -52,7 +52,7 @@ const authSlice = createSlice({
     clearAuth: (state) => {
       state.user = null;
       state.isAuthenticated = false;
-      state.isEmailVerified = false;
+      state.emailVerified = false;
       tokenManager.clearTokens();
     },
 

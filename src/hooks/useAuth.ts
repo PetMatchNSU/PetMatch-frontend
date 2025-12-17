@@ -27,7 +27,7 @@ import {
 import {
   selectAuth,
   selectIsAuthenticated,
-  selectIsEmailVerified,
+  selectEmailVerified,
 } from '../store/authSelectors';
 import { tokenManager } from '../utils/tokenManager';
 import type { LoginRequest, RegisterRequest } from '../types/auth';
@@ -42,7 +42,7 @@ export const useAuth = () => {
   const location = useLocation();
   const auth = useSelector(selectAuth);
   const isAuthenticated = useSelector(selectIsAuthenticated);
-  const isEmailVerified = useSelector(selectIsEmailVerified);
+  const emailVerified = useSelector(selectEmailVerified);
 
   // RTK Query мутации
   const [loginMutation, { isLoading: isLoginLoading, error: loginError }] = useLoginMutation();
@@ -90,15 +90,15 @@ export const useAuth = () => {
       // Сохраняем пользователя в store
       dispatch(setUser({
         email: credentials.email,
-        isEmailVerified: result.user.isEmailVerified,
+        emailVerified: result.user.emailVerified,
       }));
       console.log(result);
       console.log(result?.user);
-      console.log(result?.user?.isEmailVerified);
-      console.log(!result?.user?.isEmailVerified);
+      console.log(result?.user?.emailVerified);
+      console.log(!result?.user?.emailVerified);
       
       // Если email не подтвержден - не редиректим, показываем сообщение
-      if (!result.user.isEmailVerified) {
+      if (!result.user.emailVerified) {
         console.log('кто ты воин');
         return { success: true, emailVerified: false };
       }
@@ -127,7 +127,7 @@ export const useAuth = () => {
       // Сохраняем пользователя в store
       dispatch(setUser({
         email: userData.email,
-        isEmailVerified: result.user.isEmailVerified,
+        emailVerified: result.user.emailVerified,
         firstName: userData.firstName,
         secondName: userData.secondName,
         middleName: userData.middleName,
@@ -136,7 +136,7 @@ export const useAuth = () => {
         city: userData.city,
       }));
 
-      return { success: true, emailVerified: result.user.isEmailVerified };
+      return { success: true, emailVerified: result.user.emailVerified };
     } catch (error: any) {
       console.error('Registration error:', error);
       return {
@@ -184,7 +184,7 @@ export const useAuth = () => {
     // Состояние
     user: auth.user,
     isAuthenticated,
-    isEmailVerified,
+    emailVerified,
     isInitialized: auth.isInitialized,
 
     // Методы
