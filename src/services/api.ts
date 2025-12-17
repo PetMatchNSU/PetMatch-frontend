@@ -225,7 +225,6 @@ export const api = {
   // Get cities
   getCities: async (name: string): Promise<CityApiResponse> => {
     try {
-      console.log(name)
       const response = await apiClient.get('/city', {
         params: { name: name }
       });
