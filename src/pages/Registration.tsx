@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+/**
+ * Registration Page - страница регистрации
+ *
+ * Функционал:
+ * - Регистрация по email и паролю
+ * - Заполнение профиля (ФИО, пол, город, время связи, контакты)
+ * - Валидация всех полей
+ * - Обработка ошибок сервера
+ * - Показ сообщения о необходимости подтверждения email
+ */
+
+import React, { useState } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { api } from '../services/api';
-import type { 
-  CityLocation, 
-} from '../types/city';
-import type { 
-  RegisterRequest, 
-  ContactInfo, 
-  VisibilitySettings, 
-} from '../types/user';
-import Input, { LabelPosition } from '../components/Input/Input';
+import type { SingleValue } from 'react-select';
+import { useAuth } from '../hooks/useAuth';
+import { useCities, type CityOption } from '../hooks/useCities';
+import { registrationSchema } from '../validation/registrationSchema';
+import type { RegisterRequest, BondTime, ContactInfo } from '../types/auth';
+import Input from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import LinksBlock from '../components/LinksBlock/LinksBlock';
 import RadioButton from '../components/RadioButton/RadioButton';
@@ -19,204 +25,128 @@ import Select from '../components/Select/Select';
 import Checkbox from '../components/Checkbox/Checkbox';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
-import type { SingleValue } from 'react-select';
 import styles from './Registration.module.css';
 
-const schema = yup.object({
-  email: yup
-    .string()
-    .email('Введите корректный email')
-    .required('Email обязателен для заполнения'),
-  fullName: yup
-    .string()
-    .required('ФИО обязательно для заполнения')
-    .matches(/^[a-zA-Zа-яА-ЯёЁ\s\-']+$/, 'ФИО должно содержать только русские и латинские буквы, пробелы, дефисы и апострофы')
-    .test('min-words', 'ФИО должно содержать минимум 2 слова', (value) => {
-      if (!value) return false;
-      return value.trim().split(/\s+/).length >= 2;
-    })
-    .test('max-length', 'ФИО не должно превышать 100 символов', (value) => {
-      return !value || value.length <= 100;
-    }),
-  password: yup
-    .string()
-    .required('Пароль обязателен для заполнения')
-    .min(8, 'Пароль должен содержать минимум 8 символов')
-    .max(50, 'Пароль не должен превышать 50 символов')
-    .matches(/[A-Z]/, 'Пароль должен содержать хотя бы одну заглавную букву')
-    .matches(/[a-z]/, 'Пароль должен содержать хотя бы одну строчную букву')
-    .matches(/\d/, 'Пароль должен содержать хотя бы одну цифру')
-    .matches(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]*$/, 'Пароль содержит недопустимые символы'),
-  confirmPassword: yup
-    .string()
-    .required('Подтверждение пароля обязательно')
-    .oneOf([yup.ref('password')], 'Пароли должны совпадать'),
-  agreedToTerms: yup
-    .boolean()
-    .oneOf([true], 'Вы должны согласиться с условиями использования'),
-  city: yup
-    .string()
-    .required('Город обязателен для заполнения'),
-}).required();
+export const Registration: React.FC = () => {
+  const { register: registerUser, isRegisterLoading } = useAuth();
+  const { cities, isLoading: isLoadingCities, searchCities } = useCities();
 
-interface SelectOption {
-  value: string;
-  label: string;
-}
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
 
-const Registration: React.FC = () => {
+  // Локальное состояние для полей, не управляемых react-hook-form
+  const [selectedCity, setSelectedCity] = useState<SingleValue<CityOption>>(null);
+  const [cityInputValue, setCityInputValue] = useState('');
+  const [bondTime, setBondTime] = useState<BondTime[]>([]);
+  const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
+
   const {
     register,
     handleSubmit,
+    control,
     watch,
-    trigger,
     setValue,
-    formState: { errors, isSubmitting },
+    formState: { errors, isValid },
   } = useForm({
-    resolver: yupResolver(schema),
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    resolver: yupResolver(registrationSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      email: '',
+      firstName: '',
+      secondName: '',
+      middleName: '',
+      password: '',
+      confirmPassword: '',
+      gender: 'M' as 'M' | 'F',
+      city: '',
+      region: '',
+      bondTime: [],
+      contactInfo: [],
+      agreedToTerms: false,
+    },
   });
 
-  const [isFormValid, setIsFormValid] = useState(false);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [selectedCity, setSelectedCity] = useState<SingleValue<SelectOption>>(null);
-  const [preferredTime, setPreferredTime] = useState<string>('');
-  const [agreedToTerms, setAgreedToTerms] = useState<boolean>(false);
-  const [cityOptions, setCityOptions] = useState<SelectOption[]>([]);
-  const [isLoadingCities, setIsLoadingCities] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [allCities, setAllCities] = useState<SelectOption[]>([]);
-  const [filteredCities, setFilteredCities] = useState<SelectOption[]>([]);
-  
-  const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    email: '',
-    phone: '',
-    telegram: '',
-    vk: ''
-  });
-  
-  const [visibility, setVisibility] = useState<VisibilitySettings>({
-    email: true,
-    phone: false,
-    telegram: false,
-    vk: false
-  });
+  const genderValue = watch('gender');
 
-  const formData = watch();
-
-  useEffect(() => {
-    const loadAllCities = async () => {
-      setIsLoadingCities(true);
-      try {
-        const response = await api.getCities('');
-        
-        const options: SelectOption[] = response.locations.map((location: CityLocation) => ({
-          value: `${location.city}, ${location.region}`,
-          label: `${location.city}, ${location.region}`
-        }));
-
-        setAllCities(options);
-        setFilteredCities(options);
-      } catch (error) {
-        console.error('Ошибка при загрузке городов:', error);
-        setAllCities([]);
-        setFilteredCities([]);
-      } finally {
-        setIsLoadingCities(false);
-      }
-    };
-
-    loadAllCities();
-  }, []);
-
-  useEffect(() => {
-    if (!searchQuery) {
-      setFilteredCities(allCities);
-      return;
-    }
-
-    const filtered = allCities.filter(city =>
-      city.label.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredCities(filtered);
-  }, [searchQuery, allCities]);
-
-  const handleCitySearch = (inputValue: string) => {
-    setSearchQuery(inputValue);
+  // Префиксы для контактов
+  const CONTACT_PREFIXES: Record<string, string> = {
+    PHONE: '+7',
+    TELEGRAM: '@',
+    VK: 'https://vk.com/',
   };
-
-  useEffect(() => {
-    const timeoutId = setTimeout(async () => {
-      const hasRequiredFields = 
-        formData?.email && 
-        formData?.fullName && 
-        formData?.password && 
-        formData?.confirmPassword && 
-        selectedCity && 
-        agreedToTerms;
-
-      if (hasRequiredFields) {
-        const result = await trigger(undefined, { shouldFocus: false });
-        setIsFormValid(result);
-      } else {
-        setIsFormValid(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [formData, selectedCity, agreedToTerms, trigger]);
-
-  const handleCityChange = (newValue: SingleValue<SelectOption>) => {
-    setSelectedCity(newValue);
-    setValue('city', newValue?.value || '', { shouldValidate: true });
-  };
-
-  const handleGenderChange = (selectedValue: string) => {
-    setGender(selectedValue as 'male' | 'female');
-  };
-
-  const genderOptions = [
-    { value: 'female', label: 'Ж' },
-    { value: 'male', label: 'М' }
-  ];
 
   const onSubmit = async (data: any) => {
     setServerError(null);
-    
-    try {
+    setShowEmailVerification(false);
 
-      const registrationData: RegisterRequest = {
-        email: data.email,
-        fullName: data.fullName,
-        password: data.password,
-        gender,
-        city: selectedCity?.value || '',
-        preferredTime: preferredTime || undefined,
-        contactInfo,
-        visibility,
-      };
+    // Добавляем префиксы к контактам
+    const contactInfoWithPrefixes = data.contactInfo.map((contact: ContactInfo) => ({
+      ...contact,
+      contact: (CONTACT_PREFIXES[contact.type] || '') + contact.contact,
+    }));
 
-      const result = await api.registerUser(registrationData);
-      setRegistrationSuccess(true);
-      
-    } catch (error: any) {
-      if (error.response?.status === 409) {
-        setServerError('Пользователь с такой почтой уже существует');
-      } else {
-        setServerError('Сервис временно недоступен, приносим извинения за неудобства');
-      }
+    // Формируем данные для отправки
+    const registrationData: RegisterRequest = {
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      secondName: data.secondName,
+      middleName: data.middleName || undefined,
+      gender: data.gender,
+      region: data.region,
+      city: data.city,
+      bondTime: data.bondTime,
+      contactInfo: contactInfoWithPrefixes,
+    };
+
+    const result = await registerUser(registrationData);
+
+    if (!result.success) {
+      setServerError(result.error || 'Ошибка регистрации');
+      return;
+    }
+
+    // Показываем сообщение о необходимости подтверждения email
+    setShowEmailVerification(true);
+  };
+
+  // Обработчик изменения города
+  const handleCityChange = (newValue: SingleValue<CityOption>) => {
+    setSelectedCity(newValue);
+    setCityInputValue(''); // Сбрасываем инпут при выборе
+    if (newValue) {
+      setValue('city', newValue.city, { shouldValidate: true });
+      setValue('region', newValue.region, { shouldValidate: true });
+    } else {
+      setValue('city', '', { shouldValidate: true });
+      setValue('region', '', { shouldValidate: true });
     }
   };
 
-  if (registrationSuccess) {
+  // Обработчик изменения времени связи
+  const handleBondTimeChange = (times: BondTime[]) => {
+    setBondTime(times);
+    setValue('bondTime', times, { shouldValidate: true });
+  };
+
+  // Состояние валидности таблицы контактов
+  const [isContactInfoValid, setIsContactInfoValid] = useState(false);
+
+  // Обработчик изменения контактной информации
+  const handleContactInfoChange = (contacts: ContactInfo[], isValid: boolean) => {
+    setContactInfo(contacts);
+    setIsContactInfoValid(isValid);
+    setValue('contactInfo', contacts, { shouldValidate: true });
+  };
+
+  // Показываем сообщение о необходимости подтверждения email
+  if (showEmailVerification) {
     return (
       <div className={styles.registration}>
         <div className={styles.registration__container}>
-          <div className={styles.registration__success}>
-            <h1 className={styles.registration__title}>Регистрация</h1>
+          <div className={styles.registration__verification}>
+            <h1 className={styles.registration__title}>Подтвердите email</h1>
             <div className={styles.registration__message}>
               Пройдите по ссылке в отправленном письме для подтверждения почты.
             </div>
@@ -229,7 +159,6 @@ const Registration: React.FC = () => {
   return (
     <div className={styles.registration}>
       <div className={styles.registration__container}>
-
         {serverError && (
           <div className={styles.registration__error}>
             {serverError}
@@ -238,6 +167,8 @@ const Registration: React.FC = () => {
 
         <form onSubmit={handleSubmit(onSubmit)} className={styles.registration__form}>
           <h1>Регистрация</h1>
+
+          {/* Email */}
           <Input
             label="Email"
             type="email"
@@ -246,49 +177,83 @@ const Registration: React.FC = () => {
             error={errors.email?.message}
           />
 
+          {/* ФИО */}
           <Input
-            label="ФИО"
-            placeholder="Введите ваше полное имя"
-            {...register('fullName')}
-            error={errors.fullName?.message}
+            label="Имя"
+            type="text"
+            placeholder="Введите ваше имя"
+            {...register('firstName')}
+            error={errors.firstName?.message}
           />
 
-          <RadioButton
-              name="petType"
-              label="Пол"
-              options={genderOptions}
-              selectedValue={gender}
-              onChange={handleGenderChange}
-              inline={true}
-              labelPosition={LabelPosition.TOP}
-            />
+          <Input
+            label="Фамилия"
+            type="text"
+            placeholder="Введите вашу фамилию"
+            {...register('secondName')}
+            error={errors.secondName?.message}
+          />
 
+          <Input
+            label="Отчество"
+            type="text"
+            placeholder="Введите ваше отчество"
+            {...register('middleName')}
+            error={errors.middleName?.message}
+          />
+
+          {/* Пол */}
+          <Controller
+            name="gender"
+            control={control}
+            render={({ field }) => (
+              <RadioButton
+                label="Пол"
+                name='Пол'
+                options={[
+                  { value: 'M', label: 'М' },
+                  { value: 'F', label: 'Ж' },
+                ]}
+                selectedValue={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+
+          {/* Город проживания */}
           <Select
             label="Город проживания"
-            options={filteredCities}
+            options={cities}
             value={selectedCity}
+            inputValue={cityInputValue}
             onChange={handleCityChange}
-            onInputChange={handleCitySearch}
-            placeholder="Выберите город..."
-            isSearchable={true}
+            onInputChange={(value, actionMeta) => {
+              if (actionMeta.action === 'input-change') {
+                setCityInputValue(value);
+                searchCities(value);
+              }
+            }}
+            filterOption={() => true}
             isLoading={isLoadingCities}
-            error={errors.city?.message}
-            labelPosition={LabelPosition.TOP}
+            placeholder="Начните вводить название города"
+            error={errors.city?.message || errors.region?.message}
           />
 
+          {/* Предпочитаемое время связи */}
           <PreferredTimeInput
-            value={preferredTime}
-            label='Предпочитаемое время связи'
-            onChange={setPreferredTime}
-            labelPosition={LabelPosition.TOP}
-          />
-          <RegistrationTable
-            onContactInfoChange={setContactInfo}
-            onVisibilityChange={setVisibility}
-            contactInfo={contactInfo}
-            visibility={visibility}
+            value={bondTime}
+            onChange={handleBondTimeChange}
+            error={errors.bondTime?.message}
           />
 
+          {/* Способы связи */}
+          <RegistrationTable
+            contactInfo={contactInfo}
+            onChange={handleContactInfoChange}
+            error={errors.contactInfo?.message}
+          />
+
+          {/* Пароль */}
           <Input
             label="Пароль"
             type="password"
@@ -297,6 +262,7 @@ const Registration: React.FC = () => {
             error={errors.password?.message}
           />
 
+          {/* Подтверждение пароля */}
           <Input
             label="Подтверждение пароля"
             type="password"
@@ -305,43 +271,55 @@ const Registration: React.FC = () => {
             error={errors.confirmPassword?.message}
           />
 
-          <Checkbox 
-            label={
-              <LinksBlock 
-                title="Согласен с условием пользования"
-                links={[
-                    { text: "Пользовательское соглашение", to: "/terms/tos" },
-                    { text: "Политика обработки персональных данных", to: "/terms/toa" }
-                ]}
-                />
-            }
-            checked={agreedToTerms}
-            onChange={(e) => setAgreedToTerms(e.target.checked)}
-            error={errors.agreedToTerms?.message}
+          {/* Согласие с условиями */}
+          <Controller
+            name="agreedToTerms"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                label={
+                  <span>
+                    Я согласен с{' '}
+                    <a href="/terms/tos" target="_blank" rel="noopener noreferrer">
+                      Пользовательским соглашением
+                    </a>{' '}
+                    и{' '}
+                    <a href="/terms/toa" target="_blank" rel="noopener noreferrer">
+                      Политикой обработки персональных данных
+                    </a>
+                  </span>
+                }
+                checked={field.value}
+                onChange={field.onChange}
+                error={errors.agreedToTerms?.message}
+              />
+            )}
           />
 
+          {/* Кнопка регистрации */}
           <Button
             type="submit"
             size="large"
-            disabled={!isFormValid || isSubmitting}
+            disabled={!isValid || !isContactInfoValid || isRegisterLoading}
             className={styles.registration__submit}
           >
-            {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться'}
+            {isRegisterLoading ? 'Регистрация...' : 'Зарегистрироваться'}
           </Button>
 
+          {/* Ссылка на авторизацию */}
           <div className={styles.registration__login}>
-            <LinksBlock 
+            <LinksBlock
               title="Уже есть аккаунт?"
               links={[
-                { text: "Войти", to: "/login" }
+                { text: 'Войти', to: '/login' }
               ]}
-              layout = 'horizontal'
+              layout="horizontal"
             />
           </div>
         </form>
-    </div>
+      </div>
     </div>
   );
 };
 
-export default Registration;
+// export default Registration;

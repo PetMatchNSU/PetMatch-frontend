@@ -101,3 +101,68 @@
   font-size: 16px;
   opacity: 0.7;
 }
+
+.inputWithPrefix {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.prefix {
+  padding: 0.5rem 0 0.5rem 0.5rem;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #50280E;
+  white-space: nowrap;
+  background-color: #fff;
+}
+
+.tableInputWithPrefix {
+  flex: 1;
+  height: 100%;
+  box-sizing: border-box;
+  border: none;
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  background-color: #fff;
+}
+
+.tableInputWithPrefix:focus {
+  outline: none;
+}
+
+.tableInputWithPrefix::placeholder {
+  color: #888888;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+.error {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #dc3545;
+}
+
+.inputCell {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inputError {
+  background-color: #fff5f5;
+}
+
+.fieldError {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  color: #dc3545;
+  background-color: #fff;
+}

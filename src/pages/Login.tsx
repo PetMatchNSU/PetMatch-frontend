@@ -1,70 +1,84 @@
+/**
+ * Login Page - страница авторизации
+ *
+ * Функционал:
+ * - Авторизация по email и паролю
+ * - Валидация полей формы (Yup schema)
+ * - Обработка ошибок сервера
+ * - Показ сообщения о неподтвержденном email
+ * - Редирект после успешного входа на исходную страницу
+ */
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { api } from '../services/api';
-import type { LoginCredentials } from '../types/user';
+import { useAuth } from '../hooks/useAuth';
+import type { LoginRequest } from '../types/auth';
 import Input from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import LinksBlock from '../components/LinksBlock/LinksBlock';
+import textLogo from '../assets/PetMatch_text (3).svg';
+import logo from '../assets/PetMatch_logo (1).svg';
 import styles from './Login.module.css';
 
-const schema = yup.object({
+// Схема валидации для формы авторизации
+const loginSchema = yup.object({
   email: yup
     .string()
     .email('Введите корректный email')
+    .max(64, 'Email не должен превышать 64 символа')
     .required('Email обязателен для заполнения'),
   password: yup
     .string()
+    .min(8, 'Пароль должен содержать минимум 8 символов')
+    .max(64, 'Пароль не должен превышать 64 символа')
     .required('Пароль обязателен для заполнения'),
 }).required();
 
 const Login: React.FC = () => {
+  const { login, isLoginLoading } = useAuth();
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: yupResolver(schema),
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    formState: { errors, isValid },
+  } = useForm<LoginRequest>({
+    resolver: yupResolver(loginSchema),
+    mode: 'onChange', // Валидация при изменении для активации кнопки
+    reValidateMode: 'onChange',
   });
 
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [loginSuccess, setLoginSuccess] = useState(false);
-
-  const onSubmit = async (data: LoginCredentials) => {
+  const onSubmit = async (data: LoginRequest) => {
     setServerError(null);
-    
-    try {
-      const result = await api.loginUser(data);
-      console.log('Login successful:', result);
-      setLoginSuccess(true);
-      
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 2000);
-      
-    } catch (error: any) {
-      console.error('Login error:', error);
-      if (error.response?.status === 400) {
-        setServerError('Неверный email или пароль');
-      } else if (error.message) {
-        setServerError(error.message);
-      } else {
-        setServerError('Сервис временно недоступен, приносим извинения за неудобства');
-      }
+    setShowEmailVerification(false);
+
+    const result = await login(data);
+
+    if (!result.success) {
+      setServerError(result.error || 'Ошибка авторизации');
+      return;
     }
+
+    // Если email не подтвержден - показываем сообщение
+    if (!result.emailVerified) {
+      setShowEmailVerification(true);
+    }
+
+    // Если email подтвержден - редирект происходит автоматически в useAuth
   };
 
-  if (loginSuccess) {
+  // Показываем сообщение о необходимости подтверждения email
+  if (showEmailVerification) {
     return (
       <div className={styles.login}>
         <div className={styles.login__container}>
-          <div className={styles.login__success}>
-            <h1 className={styles.login__title}>Вход выполнен</h1>
+          <div className={styles.login__verification}>
+            <h1 className={styles.login__title}>Подтвердите email</h1>
             <div className={styles.login__message}>
-              Вы успешно вошли в систему. Перенаправляем на главную страницу...
+              Пройдите по ссылке в отправленном письме для подтверждения почты.
             </div>
           </div>
         </div>
@@ -74,16 +88,26 @@ const Login: React.FC = () => {
 
   return (
     <div className={styles.login}>
-      
       <div className={styles.login__container}>
+        {/* Логотип текст PETMATCH */}
+        <div className={styles['login__header']}>
+          <img src={textLogo} alt="PetMatch" className={styles['login__text-logo']} />
+        </div>
+
+        {/* Иконка с лапками и котятами */}
+        <div className={styles['login__logo-wrapper']}>
+          <img src={logo} alt="PetMatch Logo" className={styles['login__logo']} />
+        </div>
+
+        {/* Ошибка сервера */}
         {serverError && (
           <div className={styles.login__error}>
             {serverError}
           </div>
         )}
 
+        {/* Форма авторизации */}
         <form onSubmit={handleSubmit(onSubmit)} className={styles.login__form}>
-          <h1>Войти</h1>
           <Input
             label="Email"
             type="email"
@@ -91,6 +115,7 @@ const Login: React.FC = () => {
             {...register('email')}
             error={errors.email?.message}
           />
+
           <div className={styles.login__password}>
             <Input
               label="Пароль"
@@ -99,10 +124,10 @@ const Login: React.FC = () => {
               {...register('password')}
               error={errors.password?.message}
             />
-            <LinksBlock 
+            <LinksBlock
               title=""
               links={[
-                { text: "Забыли пароль?", to: "/forgot-password" }
+                { text: 'Забыли пароль?', to: '/forgot-password' }
               ]}
             />
           </div>
@@ -110,19 +135,19 @@ const Login: React.FC = () => {
           <Button
             type="submit"
             size="large"
-            disabled={isSubmitting}
+            disabled={!isValid || isLoginLoading}
             className={styles.login__submit}
           >
-            {isSubmitting ? 'Вход...' : 'Войти'}
+            {isLoginLoading ? 'Вход...' : 'Войти'}
           </Button>
 
           <div className={styles.login__register}>
-            <LinksBlock 
+            <LinksBlock
               title="Ещё нет аккаунта?"
               links={[
-                { text: "Зарегистрироваться", to: "/register" }
+                { text: 'Зарегистрироваться', to: '/register' }
               ]}
-              layout = 'horizontal'
+              layout="horizontal"
             />
           </div>
         </form>

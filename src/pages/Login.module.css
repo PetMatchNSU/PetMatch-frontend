@@ -1,100 +1,153 @@
+/**
+ * Login Page styles - БЭМ методология
+ * Центрированный макет с логотипами и формой
+ */
+
+/* Блок: login */
 .login {
-  min-height: 100vh;
   display: flex;
+  justify-content: center;
   align-items: center;
-  justify-content: center;
-  flex-direction: column;
+  min-height: 100vh;
+  background-color: #FBF8F3;
   padding: 20px;
-  background: #f5f5f5;
 }
 
-h1 {
-  font-size: 2rem;
-  color: #50280E;
-  margin-bottom: 20px;
-}
-
+/* Элемент: login__container */
 .login__container {
-  background: #fff;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
   width: 100%;
-  max-width: 450px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.login__title {
+/* Элемент: login__header */
+.login__header {
+  margin-bottom: 40px;
   text-align: center;
-  margin-bottom: 30px;
-  color: #333;
-  font-size: 24px;
-  font-weight: 600;
 }
 
-.login__form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.login__password {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-
-.login__submit {
+/* Элемент: login__text-logo */
+.login__text-logo {
+  max-width: 350px;
   width: 100%;
+  height: auto;
+  display: block;
+  outline: none;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.login__register {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-.login__link {
-  color: #007bff;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.login__link:hover {
-  text-decoration: underline;
-}
-
-.login__error {
-  background: #f8d7da;
-  color: #721c24;
-  padding: 12px;
-  border-radius: 4px;
+/* Элемент: login__logo-wrapper */
+.login__logo-wrapper {
   margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Элемент: login__logo */
+.login__logo {
+  max-width: 200px;
+  width: 100%;
+  height: auto;
+  display: block;
+  outline: none;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Элемент: login__error */
+.login__error {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #ffebee;
+  color: #d32f2f;
+  border-radius: 8px;
+  margin-bottom: 24px;
   font-size: 14px;
   text-align: center;
 }
 
-.login__success {
+/* Элемент: login__form */
+.login__form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Элемент: login__password */
+.login__password {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Элемент: login__submit */
+.login__submit {
+  margin-top: 10px;
+  width: 100%;
+  background-color: #AC7F5E;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login__submit:hover:not(:disabled) {
+  background-color: #8E6A4D;
+}
+
+.login__submit:disabled {
+  background-color: #D4BBA8;
+  cursor: not-allowed;
+}
+
+/* Элемент: login__register */
+.login__register {
+  margin-top: 16px;
+  text-align: center;
+}
+
+/* Элемент: login__verification */
+.login__verification {
   text-align: center;
   padding: 40px 20px;
 }
 
-.login__message {
-  background: #d1edff;
-  color: #0c5460;
-  padding: 20px;
-  border-radius: 4px;
-  margin-top: 20px;
-  font-size: 16px;
+/* Элемент: login__title */
+.login__title {
+  font-size: 28px;
+  font-weight: 600;
+  color: #50280E;
+  margin-bottom: 16px;
 }
 
+/* Элемент: login__message */
+.login__message {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* Адаптив */
 @media (max-width: 480px) {
-  .login__container {
-    padding: 20px;
-    margin: 10px;
+  .login__text-logo {
+    max-width: 280px;
   }
-  
-  .login__title {
-    font-size: 20px;
-    margin-bottom: 20px;
+
+  .login__logo {
+    max-width: 160px;
+  }
+
+  .login__logo-wrapper {
+    margin-bottom: 40px;
+  }
+
+  .login__header {
+    margin-bottom: 30px;
   }
 }
