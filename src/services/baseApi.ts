@@ -10,8 +10,7 @@ import type { RefreshTokenResponse } from '../types/auth';
 
 // http://localhost:8091/api/v1  - local 
 // http://158.160.173.155/api/v1 - server
-const API_BASE_URL = 'http://localhost:8091/api/v1'; 
-
+const API_BASE_URL = 'http://158.160.173.155/api/v1'; 
 
 /**
  * Custom base query с автоматическим добавлением токена и обработкой refresh
