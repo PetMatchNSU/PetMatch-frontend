@@ -39,7 +39,6 @@ const loginSchema = yup.object({
 const Login: React.FC = () => {
   const { login, isLoginLoading } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
-  const [showEmailVerification, setShowEmailVerification] = useState(false);
 
   const {
     register,
@@ -53,7 +52,6 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: LoginRequest) => {
     setServerError(null);
-    setShowEmailVerification(false);
 
     const result = await login(data);
 
@@ -62,29 +60,8 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Если email не подтвержден - показываем сообщение
-    if (!result.emailVerified) {
-      setShowEmailVerification(true);
-    }
-
     // Если email подтвержден - редирект происходит автоматически в useAuth
   };
-
-  // Показываем сообщение о необходимости подтверждения email
-  if (showEmailVerification) {
-    return (
-      <div className={styles.login}>
-        <div className={styles.login__container}>
-          <div className={styles.login__verification}>
-            <h1 className={styles.login__title}>Подтвердите email</h1>
-            <div className={styles.login__message}>
-              Пройдите по ссылке в отправленном письме для подтверждения почты.
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.login}>
