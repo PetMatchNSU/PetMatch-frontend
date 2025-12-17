@@ -62,10 +62,10 @@ const Login: React.FC = () => {
     }
     console.log(result);
     if (result.success) {
-      if (result?.user?.isEmailVerified) {
-        navigate('/feed');
-      } else {
+      if (!result.emailVerified) {
         navigate('/verify-email');
+      } else {
+        navigate('/feed');
       }
     }
   };
