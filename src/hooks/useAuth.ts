@@ -92,9 +92,14 @@ export const useAuth = () => {
         email: credentials.email,
         isEmailVerified: result.user.isEmailVerified,
       }));
-
+      console.log(result);
+      console.log(result?.user);
+      console.log(result?.user?.isEmailVerified);
+      console.log(!result?.user?.isEmailVerified);
+      
       // Если email не подтвержден - не редиректим, показываем сообщение
       if (!result.user.isEmailVerified) {
+        console.log('кто ты воин');
         return { success: true, emailVerified: false };
       }
       
