@@ -12,6 +12,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import { useAuth } from '../hooks/useAuth';
 import type { LoginRequest } from '../types/auth';
@@ -37,6 +38,7 @@ const loginSchema = yup.object({
 }).required();
 
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const { login, isLoginLoading } = useAuth();
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -60,7 +62,9 @@ const Login: React.FC = () => {
       return;
     }
 
-    // Если email подтвержден - редирект происходит автоматически в useAuth
+    if (result.success) {
+      navigate('/feed');
+    }
   };
 
   return (
