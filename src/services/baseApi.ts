@@ -8,7 +8,9 @@ import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolk
 import { tokenManager } from '../utils/tokenManager';
 import type { RefreshTokenResponse } from '../types/auth';
 
-const API_BASE_URL = 'http://158.160.173.155/api/v1'; //http://localhost:8091/api/v1  - local //http://158.160.173.155/api/v1 - server
+// http://localhost:8091/api/v1  - local 
+// http://158.160.173.155/api/v1 - server
+const API_BASE_URL = 'http://localhost:8091/api/v1'; 
 
 
 /**

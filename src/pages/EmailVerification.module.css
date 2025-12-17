@@ -56,3 +56,8 @@
 .email-verification__button {
   min-width: 250px;
 }
+
+.email-verification__form {
+  margin-top: 20px;
+  text-align: left;
+}

@@ -12,6 +12,7 @@
 import React, { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useNavigate } from 'react-router-dom';
 import type { SingleValue } from 'react-select';
 import { useAuth } from '../hooks/useAuth';
 import { useCities, type CityOption } from '../hooks/useCities';
@@ -28,11 +29,11 @@ import RegistrationTable from '../components/RegistrationTable';
 import styles from './Registration.module.css';
 
 export const Registration: React.FC = () => {
+  const navigate = useNavigate();
   const { register: registerUser, isRegisterLoading } = useAuth();
   const { cities, isLoading: isLoadingCities, searchCities } = useCities();
 
   const [serverError, setServerError] = useState<string | null>(null);
-  const [showEmailVerification, setShowEmailVerification] = useState(false);
 
   // Локальное состояние для полей, не управляемых react-hook-form
   const [selectedCity, setSelectedCity] = useState<SingleValue<CityOption>>(null);
@@ -78,7 +79,6 @@ export const Registration: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     setServerError(null);
-    setShowEmailVerification(false);
 
     // Добавляем префиксы к контактам
     const contactInfoWithPrefixes = data.contactInfo.map((contact: ContactInfo) => ({
@@ -107,8 +107,8 @@ export const Registration: React.FC = () => {
       return;
     }
 
-    // Показываем сообщение о необходимости подтверждения email
-    setShowEmailVerification(true);
+    // Редирект на страницу подтверждения email
+    navigate('/verify-email');
   };
 
   // Обработчик изменения города
@@ -139,22 +139,6 @@ export const Registration: React.FC = () => {
     setIsContactInfoValid(isValid);
     setValue('contactInfo', contacts, { shouldValidate: true });
   };
-
-  // Показываем сообщение о необходимости подтверждения email
-  if (showEmailVerification) {
-    return (
-      <div className={styles.registration}>
-        <div className={styles.registration__container}>
-          <div className={styles.registration__verification}>
-            <h1 className={styles.registration__title}>Подтвердите email</h1>
-            <div className={styles.registration__message}>
-              Пройдите по ссылке в отправленном письме для подтверждения почты.
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className={styles.registration}>
