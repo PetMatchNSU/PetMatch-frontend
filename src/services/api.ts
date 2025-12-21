@@ -11,7 +11,7 @@ import type {
   VerifyEmailRequest,
 } from '../types/user';
 
-const API_BASE_URL = 'http://158.160.173.155/api/v1';
+const API_BASE_URL = 'http://localhost:8091/api/v1';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -387,5 +387,21 @@ export const api = {
       fileId: Math.floor(Math.random() * 100000),
       status: "ok"
     };
-  }
+  },
+
+  getProfile: async (): Promise<UserProfile> => {
+    const response = await fetch('/api/profile', {
+      headers: getHeaders(),
+    });
+    return handleResponse<UserProfile>(response);
+  },
+  
+  updateProfile: async (profileData: Partial<UserProfile>): Promise<UserProfile> => {
+    const response = await fetch('/api/profile', {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(profileData),
+    });
+    return handleResponse<UserProfile>(response);
+  },
 };

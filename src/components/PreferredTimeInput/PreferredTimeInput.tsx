@@ -13,6 +13,7 @@ interface TimeSlot {
   bondTimeStart: string;
   bondTimeEnd: string;
   error?: string;
+  isDisabled?: boolean;
 }
 
 interface PreferredTimeInputProps {

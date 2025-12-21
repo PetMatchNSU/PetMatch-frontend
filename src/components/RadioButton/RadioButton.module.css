@@ -68,7 +68,10 @@
 }
 
 .radioButtonContainer :global(.form-check-label) {
-  color: inherit;
+  color: #50280E;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
 }
 
 .selectedValue {

@@ -224,6 +224,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 <Toggle
                   checked={localState.phone.visible}
                   onChange={handleToggleChange('phone')}
+                  disabled={disabled}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
@@ -247,6 +248,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 <Toggle
                   checked={localState.telegram.visible}
                   onChange={handleToggleChange('telegram')}
+                  disabled={disabled}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
@@ -271,6 +273,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                   checked={localState.vk.visible}
                   onChange={handleToggleChange('vk')}
                   wrapperClassName={styles.noMargin}
+                  disabled={disabled}
                 />
               </div>
             </td>
