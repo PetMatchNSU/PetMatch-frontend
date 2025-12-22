@@ -105,7 +105,7 @@ export const useAuth = () => {
       
       // Перенаправляем на страницу, с которой пришел пользователь, или на главную
       // const from = (location.state as { from?: string })?.from || '/';
-      navigate('/feed', { replace: true });
+      navigate('/', { replace: true });
 
       return { success: true, emailVerified: true };
     } catch (error: any) {
@@ -153,12 +153,12 @@ export const useAuth = () => {
     try {
       await logoutMutation().unwrap();
       dispatch(clearAuth());
-      navigate('/feed', { replace: true });
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Logout error:', error);
       // Все равно чистим локальные данные
       dispatch(clearAuth());
-      navigate('/feed', { replace: true });
+      navigate('/', { replace: true });
     }
   };
 
@@ -169,7 +169,7 @@ export const useAuth = () => {
     try {
       await verifyEmailMutation({ code }).unwrap();
       dispatch(setEmailVerified(true));
-      navigate('/feed', { replace: true });
+      navigate('/', { replace: true });
       return { success: true };
     } catch (error: any) {
       console.error('Email verification error:', error);

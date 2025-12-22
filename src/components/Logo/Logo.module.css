@@ -1,0 +1,65 @@
+.logoContainer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: opacity 0.15s ease-in-out;
+}
+
+.logoContainer:hover {
+  opacity: 0.9;
+}
+
+.logo--desktop {
+  gap: 15px;
+}
+
+.logo--desktop .logoIcon {
+  width: 40px;
+  height: 35px;
+}
+
+.logo--desktop .logoText {
+  width: 200px;
+  height: 32px;
+}
+
+.logo--mobile {
+  gap: 8px;
+}
+
+.logo--mobile .logoIcon {
+  width: 30px;
+  height: 26px;
+}
+
+.logo--mobile .logoText {
+  width: 150px;
+  height: 24px;
+}
+
+.logoContainer.logo--icon .logoText {
+  display: none;
+}
+
+.logo--desktop.logo--icon {
+  gap: 0;
+}
+
+.logo--desktop.logo--icon .logoIcon {
+  width: 40px;
+  height: 35px;
+}
+
+.logo--mobile.logo--icon {
+  gap: 0;
+}
+
+.logo--mobile.logo--icon .logoIcon {
+  width: 30px;
+  height: 26px;
+}
+
+.logoLink {
+  display: inline-flex;
+  text-decoration: none;
+}

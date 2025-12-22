@@ -48,13 +48,48 @@
   width: 100%;
 }
 
+/* Отступ для мобильного фиксированного меню */
+@media (max-width: 1024px) {
+  .App {
+    padding-top: 60px;
+  }
+}
+
+
+
 /* Custom Container Styles */
 .container {
-  width: 100%;
-  max-width: 1800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-  box-sizing: border-box;
+  width: 100%;
+}
+
+.main-content {
+  padding-top: 20px;
+  min-height: calc(100vh - 70px);
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding-top: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 15px;
+  }
+  
+  .main-content {
+    padding-top: 70px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .main-content {
+    padding-top: 30px;
+  }
 }
 
 /* Custom Navigation Styles */
