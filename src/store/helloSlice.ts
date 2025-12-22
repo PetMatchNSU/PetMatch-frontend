@@ -21,7 +21,7 @@ export const fetchHello = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const host = VITE_API_HOST || 'http://localhost:3000'
-      const response = await axios.get(`${host}/actuator/health`)
+      const response = await axios.get(`${host}/api/v1/city`)
       return response.data
     } catch (error: any) {
       return rejectWithValue(error.response?.data || 'Failed to fetch hello')
