@@ -1,5 +1,8 @@
 import React from 'react';
 import styles from './Logo.module.css';
+import logo from '../../assets/PetMatch_logo (1).svg';
+import textLogo from '../../assets/PetMatch_text (3).svg';
+import logoText from '../../assets/logo/logo-text.svg';
 
 interface LogoProps {
   variant?: 'full' | 'icon';
@@ -14,15 +17,14 @@ const Logo: React.FC<LogoProps> = ({
 }) => {
   const logoClasses = `${styles.logoContainer} ${styles[`logo--${size}`]} ${className}`;
 
-  const logoIcon = new URL('../../assets/logo/logo-icon.svg', import.meta.url).href;
-  const logoText = new URL('../../assets/logo/logo-text.svg', import.meta.url).href;
+  // const logoText = new URL('../../assets/logo/logo-text.svg', import.meta.url).href;
   
   return (
     <div className={logoClasses}>
       <img 
-        src={logoIcon} 
-        alt="PetMatch Logo"
-        className={styles.logoIcon}
+        src={logo} 
+        alt="PetMatch Logo" 
+        className={styles.logoIcon} 
       />
         
         {variant === 'full' && (
@@ -31,7 +33,7 @@ const Logo: React.FC<LogoProps> = ({
             alt="PetMatch"
             className={styles.logoText}
           />
-        )}
+        )} 
     </div>
   );
 };
