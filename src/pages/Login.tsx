@@ -65,7 +65,7 @@ const Login: React.FC = () => {
       if (!result.emailVerified) {
         navigate('/verify-email');
       } else {
-        navigate('/feed');
+        navigate('/');
       }
     }
   };

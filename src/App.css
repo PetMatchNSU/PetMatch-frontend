@@ -48,6 +48,13 @@
   width: 100%;
 }
 
+/* Отступ для мобильного фиксированного меню */
+@media (max-width: 1024px) {
+  .App {
+    padding-top: 60px;
+  }
+}
+
 
 
 /* Custom Container Styles */

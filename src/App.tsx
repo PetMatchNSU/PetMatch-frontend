@@ -9,11 +9,11 @@
  * - Навигационное меню
  */
 
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { Registration } from './pages/Registration';
 import Login from './pages/Login';
-import Home from './pages/Home';
 import Pets from './pages/Pets';
 import { Feed } from './pages/Feed';
 import EditPet from './pages/EditPet';
@@ -21,51 +21,24 @@ import EmailVerification from './pages/EmailVerification';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Profile from './pages/Profile';
-import Navigation from './components/Navigation/Navigation'
+import Navigation from './components/Navigation/Navigation';
+import { selectIsAuthenticated } from './store/authSelectors';
 import './App.css';
 
 function App() {
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+
   return (
     <div className="App">
-      <Navigation />
+      <Navigation isAuthenticated={isAuthenticated} />
       
-      {/* <div className="container main-content"> */}
-      <nav className="navbar">
-        <div className="container navbar-content">
-          <Link className="navbar-brand" to="/">
-            PetMatch
-          </Link>
-          <div className="nav-links">
-            <Link className="nav-link" to="/">
-              Главная
-            </Link>
-            <Link className="nav-link" to="/register">
-              Регистрация
-            </Link>
-            <Link className="nav-link" to="/login">
-              Вход
-            </Link>
-            <Link className="nav-link" to="/feed">
-              Лента
-            </Link>
-            <Link className="nav-link" to="/pets">
-              Мои питомцы
-            </Link>
-            <Link className="nav-link" to="/about">
-              About
-            </Link>
-          </div>
-        </div>
-      </nav>
-
       <div className="container">
         <Routes>
           {/* Публичные роуты */}
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Feed />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/feed" element={<Feed />} />
           <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/terms/tos" element={<TermsOfService />} />
           <Route path="/terms/toa" element={<PrivacyPolicy />} />

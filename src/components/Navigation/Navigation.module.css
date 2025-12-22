@@ -50,6 +50,10 @@
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
   border-radius: 4px;
+  /* Reset для кнопок */
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .navLink:hover {
@@ -102,6 +106,7 @@
   background: #CDB49F;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 16px;
   box-shadow: 0 2px 10px rgba(80, 40, 14, 0.1);
   z-index: 1001;
@@ -120,7 +125,7 @@
   border-radius: 4px;
   cursor: pointer;
   padding: 5px;
-  margin-right: 15px;
+  order: 2;
   transition: all 0.15s ease-in-out;
 }
 
@@ -158,24 +163,24 @@
 .mobileSidebar {
   position: fixed;
   top: 0;
-  left: -280px;
+  right: -280px;
   width: 280px;
   height: 100vh;
   background: #CDB49F;
-  transition: left 0.3s ease;
+  transition: right 0.3s ease;
   z-index: 1002;
-  box-shadow: 2px 0 10px rgba(80, 40, 14, 0.1);
-  border-right: 1px solid #AC7F5E;
+  box-shadow: -2px 0 10px rgba(80, 40, 14, 0.1);
+  border-left: 1px solid #AC7F5E;
 }
 
 .mobileSidebar.open {
-  left: 0;
+  right: 0;
 }
 
 .sidebarHeader {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
   padding: 10px;
   width: 100%;
   height: 60px;
@@ -227,6 +232,7 @@
 
 .sidebarLink {
   display: block;
+  width: 100%;
   padding: 1rem 1.5rem;
   color: #50280E;
   text-decoration: none;
@@ -234,6 +240,11 @@
   transition: all 0.15s ease-in-out;
   font-family: 'Roboto', sans-serif;
   font-size: 16px;
+  text-align: left;
+  /* Reset для кнопок */
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .sidebarLink:hover {

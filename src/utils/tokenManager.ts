@@ -71,11 +71,14 @@ const getRefreshToken = (): string | null => {
 };
 
 /**
- * Удаляет все токены из localStorage
+ * Удаляет все токены и данные авторизации из localStorage
  */
 const clearTokens = (): void => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
+  // Очистка дополнительных данных авторизации
+  localStorage.removeItem('user');
+  localStorage.removeItem('authState');
 };
 
 /**
