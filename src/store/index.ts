@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import exampleReducer from './exampleSlice'
 import helloReducer from './helloSlice'
 import authReducer from './authSlice'
+import profileReducer from './profileSlice'
 import { baseApi } from '../services/baseApi'
 
 /**
@@ -9,6 +10,7 @@ import { baseApi } from '../services/baseApi'
  *
  * Включает:
  * - authReducer: управление состоянием авторизации и пользователя
+ * - profileReducer: управление состоянием профиля пользователя
  * - baseApi: RTK Query API для работы с backend (auth, pets, users и т.д.)
  * - example/hello: демо-редьюсеры (можно удалить позже)
  */
@@ -17,6 +19,7 @@ export const store = configureStore({
     example: exampleReducer,
     hello: helloReducer,
     auth: authReducer,
+    profile: profileReducer,
     // RTK Query API reducer
     [baseApi.reducerPath]: baseApi.reducer,
   },

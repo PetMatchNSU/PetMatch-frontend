@@ -20,6 +20,7 @@ import EditPet from './pages/EditPet';
 import EmailVerification from './pages/EmailVerification';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import Profile from './pages/Profile';
 import './App.css';
 
 function App() {

@@ -25,7 +25,7 @@ export const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBa
     baseUrl: API_BASE_URL,
     prepareHeaders: (headers) => {
       const token = tokenManager.getAccessToken();
-      if (token && !tokenManager.isTokenExpired(token)) {
+      if (token) {
         headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
@@ -34,8 +34,13 @@ export const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBa
 
   let result = await baseQuery(args, api, extraOptions);
 
-  // Если получили 401 и есть refresh token, пробуем обновить токены
-  if (result.error && result.error.status === 401) {
+  // Проверяем нужен ли refresh: 401 или сообщение об отсутствии аутентификации
+  const errorData = result.error?.data as { message?: string } | undefined;
+  const needsRefresh = result.error?.status === 401 ||
+    errorData?.message === 'Full authentication is required to access this resource';
+
+  // Если нужен refresh и есть refresh token, пробуем обновить токены
+  if (result.error && needsRefresh) {
     const refreshToken = tokenManager.getRefreshToken();
 
     if (refreshToken && !tokenManager.isTokenExpired(refreshToken)) {
@@ -59,15 +64,14 @@ export const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBa
         // Повторяем исходный запрос с новым токеном
         result = await baseQuery(args, api, extraOptions);
       } else {
-        // Refresh token истек или невалиден - очищаем токены
+        // Refresh запрос не удался - очищаем токены и редирект на /login
         tokenManager.clearTokens();
-
-        // Можно добавить редирект на /login или dispatch action
-        // window.location.href = '/login';
+        window.location.href = '/login';
       }
     } else {
-      // Нет валидного refresh token
+      // Нет валидного refresh token - очищаем токены и редирект на /login
       tokenManager.clearTokens();
+      window.location.href = '/login';
     }
   }
 

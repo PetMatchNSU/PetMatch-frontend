@@ -51,18 +51,36 @@
 }
 
 .profile__field {
-  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.profile__field:last-child {
+  margin-bottom: 0;
 }
 
 .profile__label {
-    display: inline-block;
-    margin-bottom: 0.5rem;
-    font-family: 'Roboto', sans-serif;
-    font-weight: 300;
-    font-size: 16px;
-    color: #50280E;
-    text-align: left;
-    width: 100%;
+  flex-shrink: 0;
+  width: 200px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  text-align: left;
+  padding-top: 0.375rem;
+}
+
+.profile__value {
+  flex: 1;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  color: #50280E;
+  padding: 0.375rem 0;
+  min-height: 24px;
+  text-align: left;
 }
 
 .profile__textarea {
@@ -147,4 +165,136 @@
   padding: 40px;
   font-size: 16px;
   color: #666;
+}
+
+/* Статус профиля */
+.profile__status {
+  padding: 16px 20px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.profile__status--on_checking {
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  color: #856404;
+}
+
+.profile__status--blocked {
+  background-color: #f8d7da;
+  border: 1px solid #dc3545;
+  color: #721c24;
+}
+
+.profile__statusLabel {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+.profile__statusComment {
+  font-size: 14px;
+  margin-top: 8px;
+}
+
+/* Модальное окно */
+.modal__overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal__content {
+  background-color: white;
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal__title {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  color: #50280E;
+  font-weight: 600;
+}
+
+.modal__text {
+  margin: 0 0 20px 0;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modal__confirmButton {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.modal__confirmButton:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .profile__container {
+    padding: 20px;
+    margin: 0 10px;
+  }
+
+  .profile__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .profile__header h1 {
+    font-size: 1.5rem;
+  }
+
+  .profile__editButton {
+    width: 100%;
+  }
+
+  .profile__field {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .profile__label {
+    width: 100%;
+    padding-top: 0;
+  }
+
+  .profile__actions {
+    flex-direction: column;
+  }
+
+  .profile__cancelButton,
+  .profile__saveButton {
+    width: 100%;
+  }
+
+  .modal__actions {
+    flex-direction: column;
+  }
+
+  .modal__actions button {
+    width: 100%;
+  }
 }

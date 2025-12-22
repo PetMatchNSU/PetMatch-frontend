@@ -388,20 +388,4 @@ export const api = {
       status: "ok"
     };
   },
-
-  getProfile: async (): Promise<UserProfile> => {
-    const response = await fetch('/api/profile', {
-      headers: getHeaders(),
-    });
-    return handleResponse<UserProfile>(response);
-  },
-  
-  updateProfile: async (profileData: Partial<UserProfile>): Promise<UserProfile> => {
-    const response = await fetch('/api/profile', {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(profileData),
-    });
-    return handleResponse<UserProfile>(response);
-  },
 };
