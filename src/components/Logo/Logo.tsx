@@ -1,7 +1,6 @@
 import React from 'react';
 import styles from './Logo.module.css';
 import logo from '../../assets/PetMatch_logo (1).svg';
-import textLogo from '../../assets/PetMatch_text (3).svg';
 import logoText from '../../assets/logo/logo-text.svg';
 
 interface LogoProps {
@@ -17,8 +16,6 @@ const Logo: React.FC<LogoProps> = ({
 }) => {
   const logoClasses = `${styles.logoContainer} ${styles[`logo--${size}`]} ${className}`;
 
-  // const logoText = new URL('../../assets/logo/logo-text.svg', import.meta.url).href;
-  
   return (
     <div className={logoClasses}>
       <img 
