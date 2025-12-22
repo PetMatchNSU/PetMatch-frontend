@@ -167,3 +167,23 @@
   font-size: 0.875em;
   color: #dc3545;
 }
+
+.preferred-time-input__view-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.preferred-time-input__view-item {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  color: #50280E;
+  padding: 0.375rem 0;
+}
+
+.preferred-time-input__time:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+}

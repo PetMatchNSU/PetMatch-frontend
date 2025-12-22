@@ -21,6 +21,11 @@ interface RegistrationTableProps {
   contactInfo: ContactInfo[];
   onChange: (contacts: ContactInfo[], isValid: boolean) => void;
   error?: string;
+  disabled?: boolean;
+  /** Email пользователя (readonly, из Redux) */
+  userEmail?: string;
+  /** Режим только просмотра (без редактирования) */
+  viewMode?: boolean;
 }
 
 const contactTypeMap: Record<string, ContactType> = {
@@ -40,6 +45,9 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
   contactInfo,
   onChange,
   error,
+  disabled = false,
+  userEmail,
+  viewMode = false,
 }) => {
   const [localState, setLocalState] = useState<LocalContactState>({
     email: { contact: '', visible: true },
@@ -82,20 +90,23 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
   const validate = (state: LocalContactState): { errors: ValidationErrors; isValid: boolean } => {
     const errors: ValidationErrors = {};
 
-    const emailError = validateEmail(state.email.contact);
-    if (emailError) errors.email = emailError;
+    // Если есть userEmail, email всегда валиден
+    if (!userEmail) {
+      const emailError = validateEmail(state.email.contact);
+      if (emailError) errors.email = emailError;
+    }
 
     const phoneError = validatePhone(state.phone.contact);
     if (phoneError) errors.phone = phoneError;
 
-    const isValid = !emailError && !phoneError;
+    const isValid = Object.keys(errors).length === 0;
     return { errors, isValid };
   };
 
   // Синхронизация с входящим contactInfo
   useEffect(() => {
     const newState: LocalContactState = {
-      email: { contact: '', visible: true },
+      email: { contact: userEmail || '', visible: true },
       phone: { contact: '', visible: false },
       telegram: { contact: '', visible: false },
       vk: { contact: '', visible: false },
@@ -104,15 +115,23 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
     contactInfo.forEach((item) => {
       const key = item.type.toLowerCase() as keyof LocalContactState;
       if (newState[key]) {
-        newState[key] = {
-          contact: item.contact,
-          visible: key === 'email' ? true : item.visible
-        };
+        // Для email используем userEmail если есть
+        if (key === 'email' && userEmail) {
+          newState[key] = {
+            contact: userEmail,
+            visible: true,
+          };
+        } else {
+          newState[key] = {
+            contact: item.contact,
+            visible: key === 'email' ? true : item.visible,
+          };
+        }
       }
     });
 
     setLocalState(newState);
-  }, [contactInfo]);
+  }, [contactInfo, userEmail]);
 
   const convertToContactInfoArray = (state: LocalContactState): ContactInfo[] => {
     const result: ContactInfo[] = [];
@@ -129,6 +148,9 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
   };
 
   const handleInputChange = (field: keyof LocalContactState, value: string) => {
+    // Email нельзя менять если передан userEmail
+    if (field === 'email' && userEmail) return;
+
     const newState = {
       ...localState,
       [field]: { ...localState[field], contact: value },
@@ -160,31 +182,53 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
       onChange(convertToContactInfoArray(newState), isValid);
     };
 
+  // Форматирование значения для отображения в режиме просмотра
+  const formatDisplayValue = (field: keyof LocalContactState, value: string): string => {
+    if (!value) return '-';
+    if (field === 'phone' && value) return `${PREFIXES.phone}${value}`;
+    if (field === 'telegram' && value) return `${PREFIXES.telegram}${value}`;
+    if (field === 'vk' && value) return `${PREFIXES.vk}${value}`;
+    return value;
+  };
+
+  const isInputDisabled = disabled || viewMode;
+
   return (
     <div className={styles.registrationTableContainer}>
       <table className={styles.contactTable}>
         <thead>
           <tr>
             <th>Способ связи</th>
-            <th>Логин/Имя</th>
+            <th>{viewMode ? 'Контакт' : 'Логин/Имя'}</th>
             <th>Показывать другим пользователям</th>
           </tr>
         </thead>
         <tbody>
+          {/* Email */}
           <tr>
             <td>Email</td>
             <td>
               <div className={styles.inputCell}>
-                <input
-                  type="email"
-                  placeholder="Введите email"
-                  value={localState.email.contact}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  onBlur={() => handleBlur('email')}
-                  className={`${styles.tableInput} ${touched.email && validationErrors.email ? styles.inputError : ''}`}
-                />
-                {touched.email && validationErrors.email && (
-                  <div className={styles.fieldError}>{validationErrors.email}</div>
+                {viewMode ? (
+                  <span className={styles.displayValue}>
+                    {localState.email.contact || '-'}
+                  </span>
+                ) : (
+                  <>
+                    <input
+                      type="email"
+                      placeholder="Введите email"
+                      value={localState.email.contact}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      onBlur={() => handleBlur('email')}
+                      className={`${styles.tableInput} ${touched.email && validationErrors.email ? styles.inputError : ''}`}
+                      disabled={isInputDisabled || !!userEmail}
+                      readOnly={!!userEmail}
+                    />
+                    {touched.email && validationErrors.email && (
+                      <div className={styles.fieldError}>{validationErrors.email}</div>
+                    )}
+                  </>
                 )}
               </div>
             </td>
@@ -199,23 +243,34 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
               </div>
             </td>
           </tr>
+
+          {/* Телефон */}
           <tr>
             <td>Телефон</td>
             <td>
               <div className={styles.inputCell}>
-                <div className={styles.inputWithPrefix}>
-                  <span className={styles.prefix}>{PREFIXES.phone}</span>
-                  <input
-                    type="tel"
-                    placeholder="9001234567"
-                    value={localState.phone.contact}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    onBlur={() => handleBlur('phone')}
-                    className={`${styles.tableInputWithPrefix} ${touched.phone && validationErrors.phone ? styles.inputError : ''}`}
-                  />
-                </div>
-                {touched.phone && validationErrors.phone && (
-                  <div className={styles.fieldError}>{validationErrors.phone}</div>
+                {viewMode ? (
+                  <span className={styles.displayValue}>
+                    {formatDisplayValue('phone', localState.phone.contact)}
+                  </span>
+                ) : (
+                  <>
+                    <div className={styles.inputWithPrefix}>
+                      <span className={styles.prefix}>{PREFIXES.phone}</span>
+                      <input
+                        type="tel"
+                        placeholder="9001234567"
+                        value={localState.phone.contact}
+                        onChange={(e) => handleInputChange('phone', e.target.value)}
+                        onBlur={() => handleBlur('phone')}
+                        className={`${styles.tableInputWithPrefix} ${touched.phone && validationErrors.phone ? styles.inputError : ''}`}
+                        disabled={isInputDisabled}
+                      />
+                    </div>
+                    {touched.phone && validationErrors.phone && (
+                      <div className={styles.fieldError}>{validationErrors.phone}</div>
+                    )}
+                  </>
                 )}
               </div>
             </td>
@@ -224,48 +279,66 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                 <Toggle
                   checked={localState.phone.visible}
                   onChange={handleToggleChange('phone')}
-                  disabled={disabled}
+                  disabled={isInputDisabled}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
             </td>
           </tr>
+
+          {/* Telegram */}
           <tr>
             <td>Telegram</td>
             <td>
-              <div className={styles.inputWithPrefix}>
-                <span className={styles.prefix}>{PREFIXES.telegram}</span>
-                <input
-                  placeholder="username"
-                  value={localState.telegram.contact}
-                  onChange={(e) => handleInputChange('telegram', e.target.value)}
-                  className={styles.tableInputWithPrefix}
-                />
-              </div>
+              {viewMode ? (
+                <span className={styles.displayValue}>
+                  {formatDisplayValue('telegram', localState.telegram.contact)}
+                </span>
+              ) : (
+                <div className={styles.inputWithPrefix}>
+                  <span className={styles.prefix}>{PREFIXES.telegram}</span>
+                  <input
+                    placeholder="username"
+                    value={localState.telegram.contact}
+                    onChange={(e) => handleInputChange('telegram', e.target.value)}
+                    className={styles.tableInputWithPrefix}
+                    disabled={isInputDisabled}
+                  />
+                </div>
+              )}
             </td>
             <td>
               <div className={styles.toggleWrapper}>
                 <Toggle
                   checked={localState.telegram.visible}
                   onChange={handleToggleChange('telegram')}
-                  disabled={disabled}
+                  disabled={isInputDisabled}
                   wrapperClassName={styles.noMargin}
                 />
               </div>
             </td>
           </tr>
+
+          {/* VK */}
           <tr>
             <td>VK</td>
             <td>
-              <div className={styles.inputWithPrefix}>
-                <span className={styles.prefix}>{PREFIXES.vk}</span>
-                <input
-                  placeholder="id или username"
-                  value={localState.vk.contact}
-                  onChange={(e) => handleInputChange('vk', e.target.value)}
-                  className={styles.tableInputWithPrefix}
-                />
-              </div>
+              {viewMode ? (
+                <span className={styles.displayValue}>
+                  {formatDisplayValue('vk', localState.vk.contact)}
+                </span>
+              ) : (
+                <div className={styles.inputWithPrefix}>
+                  <span className={styles.prefix}>{PREFIXES.vk}</span>
+                  <input
+                    placeholder="id или username"
+                    value={localState.vk.contact}
+                    onChange={(e) => handleInputChange('vk', e.target.value)}
+                    className={styles.tableInputWithPrefix}
+                    disabled={isInputDisabled}
+                  />
+                </div>
+              )}
             </td>
             <td>
               <div className={styles.toggleWrapper}>
@@ -273,7 +346,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                   checked={localState.vk.visible}
                   onChange={handleToggleChange('vk')}
                   wrapperClassName={styles.noMargin}
-                  disabled={disabled}
+                  disabled={isInputDisabled}
                 />
               </div>
             </td>

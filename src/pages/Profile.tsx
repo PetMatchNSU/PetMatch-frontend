@@ -1,272 +1,313 @@
-import React, { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+/**
+ * Profile Page - страница профиля пользователя
+ *
+ * Функционал:
+ * - Просмотр данных профиля
+ * - Редактирование профиля
+ * - Валидация данных
+ * - Отображение статуса профиля (ON_CHECKING/BLOCKED)
+ */
+
+import React, { useState, useEffect, useCallback } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { api } from '../services/api';
-import type { CityLocation } from '../types/city';
-import type { UserProfile, ContactInfo, VisibilitySettings } from '../types/user';
+import { useSelector } from 'react-redux';
+import type { SingleValue } from 'react-select';
+import { selectUser } from '../store/authSelectors';
+import { useGetUserProfileQuery, useUpdateUserProfileMutation, useLazySearchCitiesQuery } from '../services/userApi';
+import type { BondTime, ContactInfoItem, Gender } from '../types/user';
+import type { ContactInfo } from '../types/auth';
 import Input, { LabelPosition } from '../components/Input/Input';
 import Button from '../components/Button/Button';
 import RadioButton from '../components/RadioButton/RadioButton';
 import Select from '../components/Select/Select';
-import Checkbox from '../components/Checkbox/Checkbox';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
-import type { SingleValue } from 'react-select';
 import styles from './Profile.module.css';
 
-const schema = yup.object({
+// Префиксы для контактов (должны совпадать с RegistrationTable)
+const CONTACT_PREFIXES: Record<string, string> = {
+  PHONE: '+7',
+  TELEGRAM: '@',
+  VK: 'https://vk.com/',
+};
+
+// Удаление префикса из значения контакта (данные с сервера приходят с префиксами)
+const stripContactPrefix = (type: string, value: string): string => {
+  const prefix = CONTACT_PREFIXES[type];
+  if (prefix && value.startsWith(prefix)) {
+    return value.slice(prefix.length);
+  }
+  return value;
+};
+
+// Добавление префикса к значению контакта (для отправки на сервер)
+const addContactPrefix = (type: string, value: string): string => {
+  const prefix = CONTACT_PREFIXES[type];
+  if (prefix && !value.startsWith(prefix)) {
+    return prefix + value;
+  }
+  return value;
+};
+
+// Разделение ФИО на отдельные поля (Фамилия Имя Отчество)
+const splitFullName = (fullName: string): { firstName: string; secondName: string; middleName: string } => {
+  const parts = fullName.trim().split(/\s+/);
+  return {
+    secondName: (parts[0] || '').trim(),  // Фамилия
+    firstName: (parts[1] || '').trim(),   // Имя
+    middleName: (parts[2] || '').trim(),  // Отчество
+  };
+};
+
+// Схема валидации профиля
+const profileSchema = yup.object({
   fullName: yup
     .string()
     .required('ФИО обязательно для заполнения')
-    .matches(/^[a-zA-Zа-яА-ЯёЁ\s\-']+$/, 'ФИО должно содержать только буквы, пробелы, дефисы и апострофы')
-    .test('min-words', 'ФИО должно содержать минимум 2 слова', (value) => {
-      if (!value) return false;
-      return value.trim().split(/\s+/).length >= 2;
-    })
-    .test('max-length', 'ФИО не должно превышать 100 символов', (value) => {
-      return !value || value.length <= 100;
-    }),
+    .min(1, 'Минимум 1 символ')
+    .max(64, 'Максимум 64 символа')
+    .matches(/^[a-zA-Zа-яА-ЯёЁ\s\-']+$/, 'ФИО должно содержать только буквы, пробелы, дефисы и апострофы'),
+  gender: yup
+    .string()
+    .oneOf(['M', 'F'], 'Выберите пол')
+    .required('Пол обязателен для заполнения'),
+  region: yup
+    .string()
+    .required('Регион обязателен для заполнения'),
   city: yup
     .string()
     .required('Город обязателен для заполнения'),
-  comment: yup
-    .string()
-    .max(500, 'Комментарий не должен превышать 500 символов'),
 }).required();
 
-interface SelectOption {
+interface CityOption {
   value: string;
   label: string;
+  city: string;
+  region: string;
+}
+
+interface ProfileFormData {
+  fullName: string;
+  gender: Gender;
+  region: string;
+  city: string;
 }
 
 const Profile: React.FC = () => {
+  // Redux
+  const user = useSelector(selectUser);
+  const userEmail = user?.email || '';
+
+  // RTK Query
+  const { data: profile, isLoading, error: loadError, refetch } = useGetUserProfileQuery();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateUserProfileMutation();
+  const [searchCities, { data: citiesData, isFetching: isLoadingCities }] = useLazySearchCitiesQuery();
+
+  // Локальное состояние
+  const [isEditing, setIsEditing] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+
+  // Состояние для полей формы
+  const [selectedCity, setSelectedCity] = useState<SingleValue<CityOption>>(null);
+  const [cityInputValue, setCityInputValue] = useState('');
+  const [bondTime, setBondTime] = useState<BondTime[]>([]);
+  const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
+  const [isContactInfoValid, setIsContactInfoValid] = useState(true);
+  const [isBondTimeValid, setIsBondTimeValid] = useState(true);
+
+  // React Hook Form
   const {
     register,
     handleSubmit,
-    watch,
-    trigger,
+    control,
     setValue,
     reset,
-    formState: { errors, isSubmitting, isDirty },
-  } = useForm({
-    resolver: yupResolver(schema),
-    mode: 'onBlur',
-    reValidateMode: 'onBlur',
+    formState: { errors, isValid, isDirty },
+  } = useForm<ProfileFormData>({
+    resolver: yupResolver(profileSchema),
+    mode: 'onChange',
+    reValidateMode: 'onChange',
+    defaultValues: {
+      fullName: '',
+      gender: 'M',
+      region: '',
+      city: '',
+    },
   });
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-  const [serverError, setServerError] = useState<string | null>(null);
-  const [gender, setGender] = useState<'male' | 'female'>('male');
-  const [selectedCity, setSelectedCity] = useState<SingleValue<SelectOption>>(null);
-  const [preferredTime, setPreferredTime] = useState<string>('');
-  const [cityOptions, setCityOptions] = useState<SelectOption[]>([]);
-  const [isLoadingCities, setIsLoadingCities] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [allCities, setAllCities] = useState<SelectOption[]>([]);
-  const [filteredCities, setFilteredCities] = useState<SelectOption[]>([]);
-  const [profileStatus, setProfileStatus] = useState<'active' | 'blocked'>('active');
-  const [comment, setComment] = useState<string>('');
-  
-  const [contactInfo, setContactInfo] = useState<ContactInfo>({
-    email: '',
-    phone: '',
-    telegram: '',
-    vk: ''
-  });
-  
-  const [visibility, setVisibility] = useState<VisibilitySettings>({
-    email: true,
-    phone: false,
-    telegram: false,
-    vk: false
-  });
+  // Опции для городов из API
+  const cityOptions: CityOption[] = citiesData?.locations?.map((loc) => ({
+    value: `${loc.region}, ${loc.city}`,
+    label: `${loc.region}, ${loc.city}`,
+    city: loc.city,
+    region: loc.region,
+  })) || [];
 
-  const formData = watch();
+  // Заполнение формы данными профиля
+  const populateForm = useCallback(() => {
+    if (!profile) return;
 
-  // Загрузка профиля при монтировании
+    reset({
+      fullName: profile.fullName,
+      gender: profile.gender,
+      region: profile.region,
+      city: profile.city,
+    });
+
+    // Устанавливаем город
+    if (profile.region && profile.city) {
+      setSelectedCity({
+        value: `${profile.region}, ${profile.city}`,
+        label: `${profile.region}, ${profile.city}`,
+        city: profile.city,
+        region: profile.region,
+      });
+    }
+
+    // Устанавливаем время связи
+    setBondTime(profile.bondTime || []);
+    setIsBondTimeValid(profile.bondTime && profile.bondTime.length > 0);
+
+    // Конвертируем contactInfo в формат для RegistrationTable (убираем префиксы)
+    const contacts: ContactInfo[] = profile.contactInfo?.map((item: ContactInfoItem) => ({
+      type: item.type,
+      contact: stripContactPrefix(item.type, item.contact),
+      visible: item.visible,
+    })) || [];
+    setContactInfo(contacts);
+    setIsContactInfoValid(contacts.length > 0);
+  }, [profile, reset]);
+
+  // Загрузка данных профиля
   useEffect(() => {
-    const loadProfile = async () => {
-      setIsLoading(true);
-      try {
-        const userProfile = await api.getProfile();
-        setProfile(userProfile);
-        
-        // Заполняем форму данными профиля
-        reset({
-          fullName: userProfile.fullName,
-          city: userProfile.city,
-          comment: userProfile.comment || '',
-        });
-        
-        setGender(userProfile.gender);
-        setPreferredTime(userProfile.preferredTime || '');
-        setContactInfo(userProfile.contactInfo);
-        setVisibility(userProfile.visibility);
-        setProfileStatus(userProfile.status);
-        setComment(userProfile.comment || '');
-        
-        // Устанавливаем выбранный город
-        if (userProfile.city) {
-          const cityOption = allCities.find(city => 
-            city.value.includes(userProfile.city.split(',')[0])
-          ) || { value: userProfile.city, label: userProfile.city };
-          setSelectedCity(cityOption);
-        }
-        
-      } catch (error) {
-        console.error('Ошибка при загрузке профиля:', error);
-        setServerError('Не удалось загрузить профиль');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    populateForm();
+  }, [populateForm]);
 
-    loadProfile();
-  }, [reset]);
+  // Обработчик поиска городов
+  const handleCitySearch = useCallback((inputValue: string) => {
+    setCityInputValue(inputValue);
+    if (inputValue.trim()) {
+      searchCities(inputValue);
+    }
+  }, [searchCities]);
 
-  // Загрузка городов
-  useEffect(() => {
-    const loadAllCities = async () => {
-      setIsLoadingCities(true);
-      try {
-        const response = await api.getCities('');
-        
-        const options: SelectOption[] = response.locations.map((location: CityLocation) => ({
-          value: `${location.city}, ${location.region}`,
-          label: `${location.city}, ${location.region}`
-        }));
+  // Обработчик выбора города
+  const handleCityChange = (newValue: SingleValue<CityOption>) => {
+    setSelectedCity(newValue);
+    setCityInputValue('');
+    if (newValue) {
+      setValue('city', newValue.city, { shouldValidate: true });
+      setValue('region', newValue.region, { shouldValidate: true });
+    } else {
+      setValue('city', '', { shouldValidate: true });
+      setValue('region', '', { shouldValidate: true });
+    }
+  };
 
-        setAllCities(options);
-        setFilteredCities(options);
-      } catch (error) {
-        console.error('Ошибка при загрузке городов:', error);
-        setAllCities([]);
-        setFilteredCities([]);
-      } finally {
-        setIsLoadingCities(false);
-      }
-    };
+  // Обработчик изменения времени связи
+  const handleBondTimeChange = (times: BondTime[]) => {
+    setBondTime(times);
+    setIsBondTimeValid(times.length > 0);
+  };
 
-    loadAllCities();
-  }, []);
+  // Обработчик изменения контактной информации
+  const handleContactInfoChange = (contacts: ContactInfo[], valid: boolean) => {
+    setContactInfo(contacts);
+    setIsContactInfoValid(valid);
+  };
 
-  useEffect(() => {
-    if (!searchQuery) {
-      setFilteredCities(allCities);
+  // Начать редактирование
+  const handleEdit = () => {
+    setIsEditing(true);
+    setSaveSuccess(false);
+    setServerError(null);
+  };
+
+  // Отмена редактирования
+  const handleCancelClick = () => {
+    if (isDirty || bondTime !== profile?.bondTime || contactInfo.length !== profile?.contactInfo?.length) {
+      setShowCancelModal(true);
+    } else {
+      handleCancelConfirm();
+    }
+  };
+
+  // Подтверждение отмены
+  const handleCancelConfirm = () => {
+    setShowCancelModal(false);
+    populateForm();
+    setIsEditing(false);
+    setServerError(null);
+  };
+
+  // Отправка формы
+  const onSubmit = async (data: ProfileFormData) => {
+    setServerError(null);
+    setSaveSuccess(false);
+
+    // Проверяем валидность всех полей
+    if (!isBondTimeValid) {
+      setServerError('Укажите хотя бы один интервал времени для связи');
       return;
     }
 
-    const filtered = allCities.filter(city =>
-      city.label.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredCities(filtered);
-  }, [searchQuery, allCities]);
+    if (!isContactInfoValid || contactInfo.length === 0) {
+      setServerError('Укажите хотя бы один способ связи');
+      return;
+    }
 
-  const handleCitySearch = (inputValue: string) => {
-    setSearchQuery(inputValue);
-  };
-
-  const handleCityChange = (newValue: SingleValue<SelectOption>) => {
-    setSelectedCity(newValue);
-    setValue('city', newValue?.value || '', { shouldValidate: true });
-  };
-
-  const handleGenderChange = (selectedValue: string) => {
-    setGender(selectedValue as 'male' | 'female');
-  };
-
-  const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setComment(e.target.value);
-    setValue('comment', e.target.value, { shouldValidate: true });
-  };
-
-  const genderOptions = [
-    { value: 'female', label: 'Ж' },
-    { value: 'male', label: 'М' }
-  ];
-
-  const statusOptions = [
-    { value: 'active', label: 'Активен' },
-    { value: 'blocked', label: 'Заблокирован' }
-  ];
-
-  const onSubmit = async (data: any) => {
-    setServerError(null);
-    setSaveSuccess(false);
-    
     try {
-      const profileData: Partial<UserProfile> = {
-        fullName: data.fullName,
-        gender,
-        city: selectedCity?.value || '',
-        preferredTime: preferredTime || undefined,
-        contactInfo,
-        visibility,
-        comment: data.comment || '',
-        status: profileStatus,
-      };
+      const { firstName, secondName, middleName } = splitFullName(data.fullName);
 
-      await api.updateProfile(profileData);
+      await updateProfile({
+        firstName,
+        secondName,
+        middleName,
+        gender: data.gender,
+        region: data.region,
+        city: data.city,
+        bondTime: bondTime,
+        contactInfo: contactInfo.map((c) => ({
+          type: c.type,
+          contact: addContactPrefix(c.type, c.contact),
+          visible: c.visible,
+        })),
+      }).unwrap();
+
       setSaveSuccess(true);
       setIsEditing(false);
-      
-      // Обновляем локальное состояние профиля
-      if (profile) {
-        setProfile({
-          ...profile,
-          ...profileData
-        });
-      }
-      
+      refetch();
+
       // Скрываем сообщение об успехе через 3 секунды
       setTimeout(() => {
         setSaveSuccess(false);
       }, 3000);
-      
-    } catch (error: any) {
-      console.error('Ошибка при сохранении профиля:', error);
-      setServerError('Не удалось сохранить изменения. Попробуйте еще раз.');
+    } catch (err: unknown) {
+      console.error('Ошибка при сохранении профиля:', err);
+      const error = err as { data?: { error?: string } };
+      setServerError(error?.data?.error || 'Не удалось сохранить изменения. Попробуйте еще раз.');
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
+  // Форматирование города для отображения
+  const formatCityDisplay = (): string => {
+    if (!profile?.region || !profile?.city) return '-';
+    return `${profile.region}, ${profile.city}`;
   };
 
-  const handleCancel = () => {
-    if (profile) {
-      reset({
-        fullName: profile.fullName,
-        city: profile.city,
-        comment: profile.comment || '',
-      });
-      setGender(profile.gender);
-      setPreferredTime(profile.preferredTime || '');
-      setContactInfo(profile.contactInfo);
-      setVisibility(profile.visibility);
-      setProfileStatus(profile.status);
-      setComment(profile.comment || '');
-      
-      if (profile.city) {
-        const cityOption = allCities.find(city => 
-          city.value.includes(profile.city.split(',')[0])
-        ) || { value: profile.city, label: profile.city };
-        setSelectedCity(cityOption);
-      }
-    }
-    setIsEditing(false);
-    setServerError(null);
-    setSaveSuccess(false);
+  // Форматирование пола для отображения
+  const formatGenderDisplay = (gender: Gender): string => {
+    return gender === 'M' ? 'М' : 'Ж';
   };
 
-  const handleStatusChange = (selectedValue: string) => {
-    setProfileStatus(selectedValue as 'active' | 'blocked');
-  };
+  // Проверка можно ли сохранить форму
+  const canSave = isValid && isContactInfoValid && isBondTimeValid && !isUpdating;
 
+  // Загрузка
   if (isLoading) {
     return (
       <div className={styles.profile}>
@@ -279,22 +320,51 @@ const Profile: React.FC = () => {
     );
   }
 
+  // Ошибка загрузки
+  if (loadError) {
+    return (
+      <div className={styles.profile}>
+        <div className={styles.profile__container}>
+          <div className={styles.profile__error}>
+            Не удалось загрузить профиль. Попробуйте обновить страницу.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.profile}>
       <div className={styles.profile__container}>
-
+        {/* Сообщение об успехе */}
         {saveSuccess && (
           <div className={styles.profile__success}>
             Изменения успешно сохранены!
           </div>
         )}
 
+        {/* Ошибка сервера */}
         {serverError && (
           <div className={styles.profile__error}>
             {serverError}
           </div>
         )}
 
+        {/* Статус профиля */}
+        {profile && (profile.reviewStatus === 'ON_CHECKING' || profile.reviewStatus === 'BLOCKED') && (
+          <div className={`${styles.profile__status} ${styles[`profile__status--${profile.reviewStatus.toLowerCase()}`]}`}>
+            <div className={styles.profile__statusLabel}>
+              {profile.reviewStatus === 'ON_CHECKING' ? 'Профиль на проверке' : 'Профиль заблокирован'}
+            </div>
+            {profile.reviewComment && (
+              <div className={styles.profile__statusComment}>
+                Комментарий: {profile.reviewComment}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Заголовок */}
         <div className={styles.profile__header}>
           <h1>Профиль пользователя</h1>
           {!isEditing && (
@@ -309,119 +379,158 @@ const Profile: React.FC = () => {
           )}
         </div>
 
+        {/* Форма */}
         <form onSubmit={handleSubmit(onSubmit)} className={styles.profile__form}>
+          {/* Основная информация */}
           <div className={styles.profile__section}>
             <h2 className={styles.profile__sectionTitle}>Основная информация</h2>
-            
-            <Input
-              label="ФИО"
-              placeholder="Введите ваше полное имя"
-              {...register('fullName')}
-              error={errors.fullName?.message}
-              disabled={!isEditing}
-              readOnly={!isEditing}
-            />
 
-            <RadioButton
-              name="gender"
-              label="Пол"
-              options={genderOptions}
-              selectedValue={gender}
-              onChange={handleGenderChange}
-              inline={true}
-              labelPosition={LabelPosition.TOP}
-              disabled={!isEditing}
-            />
+            {/* ФИО */}
+            {isEditing ? (
+              <Input
+                label="ФИО"
+                placeholder="Введите ваше полное имя"
+                {...register('fullName')}
+                error={errors.fullName?.message}
+              />
+            ) : (
+              <div className={styles.profile__field}>
+                <label className={styles.profile__label}>ФИО</label>
+                <div className={styles.profile__value}>{profile?.fullName || '-'}</div>
+              </div>
+            )}
 
-            <Select
-              label="Город проживания"
-              options={filteredCities}
-              value={selectedCity}
-              onChange={handleCityChange}
-              onInputChange={handleCitySearch}
-              placeholder="Выберите город..."
-              isSearchable={true}
-              isLoading={isLoadingCities}
-              error={errors.city?.message}
-              labelPosition={LabelPosition.TOP}
-              isDisabled={!isEditing}
-            />
+            {/* Пол */}
+            {isEditing ? (
+              <Controller
+                name="gender"
+                control={control}
+                render={({ field }) => (
+                  <RadioButton
+                    label="Пол"
+                    name="gender"
+                    options={[
+                      { value: 'M', label: 'М' },
+                      { value: 'F', label: 'Ж' },
+                    ]}
+                    selectedValue={field.value}
+                    onChange={field.onChange}
+                    inline={true}
+                    labelPosition={LabelPosition.TOP}
+                  />
+                )}
+              />
+            ) : (
+              <div className={styles.profile__field}>
+                <label className={styles.profile__label}>Пол</label>
+                <div className={styles.profile__value}>
+                  {profile?.gender ? formatGenderDisplay(profile.gender) : '-'}
+                </div>
+              </div>
+            )}
 
+            {/* Город */}
+            {isEditing ? (
+              <Select
+                label="Город проживания"
+                options={cityOptions}
+                value={selectedCity}
+                inputValue={cityInputValue}
+                onChange={(newValue) => handleCityChange(newValue as SingleValue<CityOption>)}
+                onInputChange={(value, actionMeta) => {
+                  if (actionMeta.action === 'input-change') {
+                    handleCitySearch(value);
+                  }
+                }}
+                filterOption={() => true}
+                isLoading={isLoadingCities}
+                placeholder="Начните вводить название города"
+                error={errors.city?.message || errors.region?.message}
+                labelPosition={LabelPosition.TOP}
+              />
+            ) : (
+              <div className={styles.profile__field}>
+                <label className={styles.profile__label}>Город проживания</label>
+                <div className={styles.profile__value}>{formatCityDisplay()}</div>
+              </div>
+            )}
+
+            {/* Время связи */}
             <PreferredTimeInput
-              value={preferredTime}
-              label='Предпочитаемое время связи'
-              onChange={setPreferredTime}
+              label="Предпочитаемое время связи"
+              value={bondTime}
+              onChange={handleBondTimeChange}
               labelPosition={LabelPosition.TOP}
-              isDisabled={!isEditing}
+              viewMode={!isEditing}
+              disabled={!isEditing}
+              error={!isBondTimeValid && isEditing ? 'Укажите хотя бы один интервал времени' : undefined}
             />
           </div>
 
+          {/* Контактная информация */}
           <div className={styles.profile__section}>
             <h2 className={styles.profile__sectionTitle}>Контактная информация</h2>
             <RegistrationTable
-              onContactInfoChange={setContactInfo}
-              onVisibilityChange={setVisibility}
               contactInfo={contactInfo}
-              visibility={visibility}
+              onChange={handleContactInfoChange}
+              userEmail={userEmail}
+              viewMode={!isEditing}
               disabled={!isEditing}
+              error={!isContactInfoValid && isEditing ? 'Укажите хотя бы один способ связи' : undefined}
             />
           </div>
 
-          <div className={styles.profile__section}>
-            <h2 className={styles.profile__sectionTitle}>Дополнительно</h2>
-            
-            <div className={styles.profile__field}>
-              <label className={styles.profile__label}>Статус профиля</label>
-              <RadioButton
-                name="status"
-                options={statusOptions}
-                selectedValue={profileStatus}
-                onChange={handleStatusChange}
-                inline={true}
-                disabled={!isEditing}
-              />
-            </div>
-
-            <div className={styles.profile__field}>
-              <label className={styles.profile__label}>Комментарий</label>
-              <textarea
-                className={styles.profile__textarea}
-                value={comment}
-                onChange={handleCommentChange}
-                placeholder="Введите комментарий..."
-                disabled={!isEditing}
-                maxLength={500}
-              />
-              {errors.comment?.message && (
-                <div className={styles.profile__errorText}>{errors.comment.message}</div>
-              )}
-              <div className={styles.profile__charCount}>
-                {comment.length}/500
-              </div>
-            </div>
-          </div>
-
+          {/* Кнопки действий */}
           {isEditing && (
             <div className={styles.profile__actions}>
               <Button
                 type="button"
                 size="large"
-                onClick={handleCancel}
+                onClick={handleCancelClick}
                 className={styles.profile__cancelButton}
               >
-                Отменить
+                Отмена
               </Button>
               <Button
                 type="submit"
                 size="large"
-                disabled={isSubmitting || !isDirty}
+                disabled={!canSave}
                 className={styles.profile__saveButton}
               >
-                {isSubmitting ? 'Сохранение...' : 'Сохранить'}
+                {isUpdating ? 'Сохранение...' : 'Сохранить'}
               </Button>
             </div>
           )}
         </form>
+
+        {/* Модальное окно подтверждения отмены */}
+        {showCancelModal && (
+          <div className={styles.modal__overlay}>
+            <div className={styles.modal__content}>
+              <h3 className={styles.modal__title}>Отменить изменения?</h3>
+              <p className={styles.modal__text}>
+                Все несохранённые изменения будут потеряны.
+              </p>
+              <div className={styles.modal__actions}>
+                <Button
+                  type="button"
+                  size="medium"
+                  onClick={() => setShowCancelModal(false)}
+                >
+                  Продолжить редактирование
+                </Button>
+                <Button
+                  type="button"
+                  size="medium"
+                  onClick={handleCancelConfirm}
+                  className={styles.modal__confirmButton}
+                >
+                  Отменить изменения
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

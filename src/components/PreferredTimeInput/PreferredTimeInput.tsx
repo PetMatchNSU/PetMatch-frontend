@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './PreferredTimeInput.module.css';
 import type { BondTime } from '../../types/auth';
 
@@ -22,29 +22,65 @@ interface PreferredTimeInputProps {
   labelPosition?: LabelPositionType;
   onChange?: (value: BondTime[]) => void;
   error?: string;
+  /** Отключить редактирование */
+  disabled?: boolean;
+  /** Режим только просмотра */
+  viewMode?: boolean;
 }
 
 const MAX_INTERVALS = 4;
+
+// Нормализация времени: "HH:mm:ss" -> "HH:mm"
+const normalizeTime = (time: string): string => {
+  if (!time) return '';
+  // Если формат HH:mm:ss, обрезаем секунды
+  if (time.length === 8 && time.split(':').length === 3) {
+    return time.substring(0, 5);
+  }
+  return time;
+};
 
 const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
   label = 'Предпочитаемое время связи',
   labelPosition = LabelPosition.TOP,
   value = [],
   onChange,
-  error
+  error,
+  disabled = false,
+  viewMode = false,
 }) => {
   const [slots, setSlots] = useState<TimeSlot[]>([{ bondTimeStart: '', bondTimeEnd: '' }]);
+  const prevViewModeRef = useRef(viewMode);
+  const isInitialMount = useRef(true);
 
-  // Синхронизация с входящим value
+  // Синхронизация с входящим value только при:
+  // 1. Первоначальной загрузке (если есть данные)
+  // 2. Переходе из режима просмотра в режим редактирования
   useEffect(() => {
+    const wasViewMode = prevViewModeRef.current;
+    prevViewModeRef.current = viewMode;
+
+    // Синхронизируем при первой загрузке или при переходе viewMode: true -> false
+    const shouldSync = isInitialMount.current || (wasViewMode && !viewMode);
+    isInitialMount.current = false;
+
+    if (!shouldSync) return;
+
     if (value && value.length > 0) {
-      const newSlots = value.map((v) => ({
-        bondTimeStart: v.bondTimeStart || '',
-        bondTimeEnd: v.bondTimeEnd || '',
+      const newSlots: TimeSlot[] = value.map((v) => ({
+        bondTimeStart: normalizeTime(v.bondTimeStart),
+        bondTimeEnd: normalizeTime(v.bondTimeEnd),
       }));
+      // Добавляем пустой слот для ввода нового интервала (если не достигнут лимит)
+      if (!viewMode && newSlots.length < MAX_INTERVALS) {
+        newSlots.push({ bondTimeStart: '', bondTimeEnd: '' });
+      }
       setSlots(newSlots);
+    } else if (!viewMode) {
+      // В режиме редактирования без значений - показываем пустой слот
+      setSlots([{ bondTimeStart: '', bondTimeEnd: '' }]);
     }
-  }, []);
+  }, [value, viewMode]);
 
   // Форматирование времени (HH:MM)
   const formatTime = (val: string): string => {
@@ -95,7 +131,7 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
     });
 
     // Удаляем пустые слоты в конце (кроме первого)
-    let trimmedSlots = [...validatedSlots];
+    const trimmedSlots = [...validatedSlots];
     while (
       trimmedSlots.length > 1 &&
       !trimmedSlots[trimmedSlots.length - 1].bondTimeStart &&
@@ -140,6 +176,16 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
     }
   };
 
+  const isInputDisabled = disabled || viewMode;
+
+  // Форматирование для режима просмотра
+  const formatViewValue = (start: string, end: string): string => {
+    const normalizedStart = normalizeTime(start);
+    const normalizedEnd = normalizeTime(end);
+    if (!normalizedStart && !normalizedEnd) return '-';
+    return `С ${normalizedStart || '--:--'} по ${normalizedEnd || '--:--'}`;
+  };
+
   return (
     <div className={`${styles['preferred-time-input']} ${styles[`preferred-time-input--${labelPosition}`]}`}>
       <div className={styles['preferred-time-input__container']}>
@@ -149,53 +195,69 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
           </label>
         )}
 
-        <div className={styles['preferred-time-input__slots']}>
-          {slots.map((slot, index) => (
-            <div key={index} className={styles['preferred-time-input__slot']}>
-              <div className={styles['preferred-time-input__wrapper']}>
-                <div className={styles['preferred-time-input__first-half']}>
-                  <span className={styles['preferred-time-input__prefix']}>с</span>
-                  <div className={styles['preferred-time-input__time-wrapper']}>
-                    <input
-                      type="text"
-                      value={slot.bondTimeStart}
-                      onChange={(e) => handleTimeChange(index, 'bondTimeStart', e.target.value)}
-                      placeholder="__:__"
-                      maxLength={5}
-                      className={`${styles['preferred-time-input__time']} ${slot.error ? styles['preferred-time-input__time--error'] : ''}`}
-                    />
-                  </div>
+        {viewMode ? (
+          <div className={styles['preferred-time-input__view-list']}>
+            {value && value.length > 0 ? (
+              value.map((slot, index) => (
+                <div key={index} className={styles['preferred-time-input__view-item']}>
+                  {formatViewValue(slot.bondTimeStart, slot.bondTimeEnd)}
                 </div>
-
-                <div className={styles['preferred-time-input__second-half']}>
-                  <span className={styles['preferred-time-input__separator']}>по</span>
-                  <div className={styles['preferred-time-input__time-wrapper']}>
-                    <input
-                      type="text"
-                      value={slot.bondTimeEnd}
-                      onChange={(e) => handleTimeChange(index, 'bondTimeEnd', e.target.value)}
-                      placeholder="__:__"
-                      maxLength={5}
-                      className={`${styles['preferred-time-input__time']} ${slot.error ? styles['preferred-time-input__time--error'] : ''}`}
-                    />
+              ))
+            ) : (
+              <div className={styles['preferred-time-input__view-item']}>Не указано</div>
+            )}
+          </div>
+        ) : (
+          <div className={styles['preferred-time-input__slots']}>
+            {slots.map((slot, index) => (
+              <div key={index} className={styles['preferred-time-input__slot']}>
+                <div className={styles['preferred-time-input__wrapper']}>
+                  <div className={styles['preferred-time-input__first-half']}>
+                    <span className={styles['preferred-time-input__prefix']}>с</span>
+                    <div className={styles['preferred-time-input__time-wrapper']}>
+                      <input
+                        type="text"
+                        value={slot.bondTimeStart}
+                        onChange={(e) => handleTimeChange(index, 'bondTimeStart', e.target.value)}
+                        placeholder="__:__"
+                        maxLength={5}
+                        className={`${styles['preferred-time-input__time']} ${slot.error ? styles['preferred-time-input__time--error'] : ''}`}
+                        disabled={isInputDisabled}
+                      />
+                    </div>
                   </div>
-                </div>
 
-                {(slots.length > 1 || slot.bondTimeStart || slot.bondTimeEnd) && (
-                  <button
-                    type="button"
-                    className={styles['preferred-time-input__remove']}
-                    onClick={() => handleRemoveSlot(index)}
-                    aria-label="Удалить интервал"
-                  >
-                    ×
-                  </button>
-                )}
+                  <div className={styles['preferred-time-input__second-half']}>
+                    <span className={styles['preferred-time-input__separator']}>по</span>
+                    <div className={styles['preferred-time-input__time-wrapper']}>
+                      <input
+                        type="text"
+                        value={slot.bondTimeEnd}
+                        onChange={(e) => handleTimeChange(index, 'bondTimeEnd', e.target.value)}
+                        placeholder="__:__"
+                        maxLength={5}
+                        className={`${styles['preferred-time-input__time']} ${slot.error ? styles['preferred-time-input__time--error'] : ''}`}
+                        disabled={isInputDisabled}
+                      />
+                    </div>
+                  </div>
+
+                  {!isInputDisabled && (slots.length > 1 || slot.bondTimeStart || slot.bondTimeEnd) && (
+                    <button
+                      type="button"
+                      className={styles['preferred-time-input__remove']}
+                      onClick={() => handleRemoveSlot(index)}
+                      aria-label="Удалить интервал"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+                {slot.error && <div className={styles['preferred-time-input__slot-error']}>{slot.error}</div>}
               </div>
-              {slot.error && <div className={styles['preferred-time-input__slot-error']}>{slot.error}</div>}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {error && <div className={styles['preferred-time-input__error']}>{error}</div>}
