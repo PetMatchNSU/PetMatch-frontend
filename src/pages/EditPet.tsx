@@ -31,10 +31,7 @@ import type {
   CreateAnimalRequest,
   UpdateAnimalRequest,
   LocalFile,
-  LocalDocument,
-  DocumentType,
   FileUploadDescriptor,
-  FileType,
 } from '../types/animal';
 import Input from '../components/Input/Input';
 import CustomSelect from '../components/Select/Select';

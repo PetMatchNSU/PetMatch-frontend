@@ -120,6 +120,26 @@ const shouldRefreshToken = (): boolean => {
   return false;
 };
 
+/**
+ * Получает userId из access token
+ */
+const getUserId = (): number | null => {
+  const accessToken = getAccessToken();
+  if (!accessToken) {
+    return null;
+  }
+
+  const payload = decodeToken(accessToken);
+  if (!payload) {
+    return null;
+  }
+  console.log(payload);
+  console.log(payload.userID)
+
+  // userId может быть в разных полях в зависимости от бэкенда
+  return payload.userID;
+};
+
 export const tokenManager = {
   setTokens,
   getAccessToken,
@@ -129,4 +149,5 @@ export const tokenManager = {
   shouldRefreshToken,
   isTokenExpired,
   decodeToken,
+  getUserId,
 };

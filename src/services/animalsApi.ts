@@ -20,6 +20,7 @@ import type {
   FileGetResponse,
   FileDeleteRequest,
   FileDeleteResponse,
+  AnimalOwnerContactsResponse,
 } from '../types/animal';
 
 // Base URL для файлов
@@ -188,6 +189,11 @@ export const animalsApi = baseApi.injectEndpoints({
         body: request,
       }),
     }),
+
+    // GET /api/v1/animals/show/{animalId}/contacts - Получить контакты владельца
+    getAnimalOwnerContacts: builder.query<AnimalOwnerContactsResponse, number>({
+      query: (animalId) => `/animals/show/${animalId}/contacts`,
+    }),
   }),
   overrideExisting: false,
 });
@@ -207,4 +213,5 @@ export const {
   useGetFilesQuery,
   useLazyGetFilesQuery,
   useDeleteFilesMutation,
+  useLazyGetAnimalOwnerContactsQuery,
 } = animalsApi;
