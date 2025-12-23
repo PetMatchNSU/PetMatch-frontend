@@ -1,80 +1,111 @@
-import React from 'react';
+/**
+ * FeedAnimalCard - карточка животного в ленте
+ *
+ * Отображает:
+ * - Основная фотография
+ * - Кличка
+ * - Вид животного
+ * - Порода (если есть)
+ * - Дата рождения (ДД.ММ.ГГГГ)
+ * - Пол
+ * - Город проживания
+ * - Дата создания объявления
+ */
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getPhotoUrl } from '../../services/animalsApi';
+import type { AnimalListItem } from '../../types/animal';
 import styles from './FeedAnimalCard.module.css';
 
-interface Animal {
-  animalId: number;
-  name: string;
-  speciesName: string;
-  goal: string;
-  hasBreed: boolean;
-  breed: string | null;
-  gender: string;
-  birthday: string;
-  location: {
-    region: string;
-    city: string;
-  };
-  mainPhotoId: number;
-  createdAt: string;
-}
-
 interface FeedAnimalCardProps {
-  animal: Animal;
+  animal: AnimalListItem;
 }
 
 export const FeedAnimalCard: React.FC<FeedAnimalCardProps> = ({ animal }) => {
-  // Function to format the date
+  const navigate = useNavigate();
+  const [imageError, setImageError] = useState(false);
+
+  // Форматирование даты в ДД.ММ.ГГГГ
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getDate().toString().padStart(2, '0')}.${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getFullYear()}`;
   };
 
-  // Function to get goal text
+  // Получение текста цели
   const getGoalText = () => {
     switch (animal.goal) {
       case 'SELL':
         return 'Продажа';
       case 'FREE':
-        return '';
+        return 'Бесплатно';
       case 'BUY':
-        return 'Случка';
+      case 'PAIRING':
+        return 'Вязка';
       default:
         return '';
     }
   };
 
+  // URL фотографии
+  const photoUrl = getPhotoUrl(animal.mainPhotoId, 400, 400);
+
+  // Обработчик клика на карточку
+  const handleClick = () => {
+    navigate(`/animal/${animal.animalId}`);
+  };
+
+  // Обработчик ошибки загрузки изображения
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
-    <div className={styles.card}>
+    <div className={styles.card} onClick={handleClick}>
+      {/* Фотография */}
       <div className={styles.card__photo}>
-        <span>Фото ID: {animal.mainPhotoId}</span>
+        {photoUrl && !imageError ? (
+          <img
+            src={photoUrl}
+            alt={animal.name}
+            onError={handleImageError}
+            loading="lazy"
+          />
+        ) : (
+          <div className={styles.card__photoPlaceholder}>
+            <span>🐾</span>
+          </div>
+        )}
+        {/* Бейдж цели */}
+        {getGoalText() && (
+          <div className={styles.card__goalBadge}>
+            {getGoalText()}
+          </div>
+        )}
       </div>
 
+      {/* Заголовок с полом */}
       <div className={styles.card__header}>
-        <div className={styles.card__gender}>
+        <div className={styles.card__name}>{animal.name}</div>
+        <div className={`${styles.card__gender} ${animal.gender === 'M' ? styles['card__gender--male'] : styles['card__gender--female']}`}>
           {animal.gender === 'M' ? '♂' : '♀'}
         </div>
       </div>
 
-      <div className={styles.card__name}>
-        {animal.name}
+      {/* Информация */}
+      <div className={styles.card__info}>
+        <div className={styles.card__species}>{animal.speciesName}</div>
+        <div className={styles.card__breed}>
+          {animal.breed || 'Без породы'}
+        </div>
+        <div className={styles.card__birthday}>
+          {formatDate(animal.birthday)}
+        </div>
       </div>
 
-      <div className={styles.card__species}>
-        {animal.speciesName}
-      </div>
-
-      <div className={styles.card__breed}>
-        {animal.breed || 'Без породы'}
-      </div>
-
-      <div className={styles.card__birthday}>
-        {animal.birthday}
-      </div>
-
-      <hr className={styles.card__divider} />
-
+      {/* Футер */}
       <div className={styles.card__footer}>
-        <div className={styles.card__city_footer}>
+        <div className={styles.card__city}>
           {animal.location.city}
         </div>
         <div className={styles.card__date}>
