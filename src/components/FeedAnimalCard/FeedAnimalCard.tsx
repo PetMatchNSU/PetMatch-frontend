@@ -12,19 +12,18 @@
  * - Дата создания объявления
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getPhotoUrl } from '../../services/animalsApi';
 import type { AnimalListItem } from '../../types/animal';
 import styles from './FeedAnimalCard.module.css';
 
 interface FeedAnimalCardProps {
   animal: AnimalListItem;
+  photoUrl: string | null;
 }
 
-export const FeedAnimalCard: React.FC<FeedAnimalCardProps> = ({ animal }) => {
+export const FeedAnimalCard: React.FC<FeedAnimalCardProps> = ({ animal, photoUrl }) => {
   const navigate = useNavigate();
-  const [imageError, setImageError] = useState(false);
 
   // Форматирование даты в ДД.ММ.ГГГГ
   const formatDate = (dateString: string) => {
@@ -47,28 +46,19 @@ export const FeedAnimalCard: React.FC<FeedAnimalCardProps> = ({ animal }) => {
     }
   };
 
-  // URL фотографии
-  const photoUrl = getPhotoUrl(animal.mainPhotoId, 400, 400);
-
   // Обработчик клика на карточку
   const handleClick = () => {
     navigate(`/animal/${animal.animalId}`);
-  };
-
-  // Обработчик ошибки загрузки изображения
-  const handleImageError = () => {
-    setImageError(true);
   };
 
   return (
     <div className={styles.card} onClick={handleClick}>
       {/* Фотография */}
       <div className={styles.card__photo}>
-        {photoUrl && !imageError ? (
+        {photoUrl ? (
           <img
             src={photoUrl}
             alt={animal.name}
-            onError={handleImageError}
             loading="lazy"
           />
         ) : (

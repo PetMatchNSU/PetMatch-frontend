@@ -16,10 +16,12 @@ import { useSelector } from 'react-redux';
 import {
   useGetAnimalDetailQuery,
   useLazyGetFilesQuery,
+  useLazyGetAnimalOwnerContactsQuery,
   base64ToDataUrl,
   getMimeType,
 } from '../services/animalsApi';
 import { selectIsAuthenticated } from '../store/authSelectors';
+import type { AnimalOwnerContactsResponse } from '../types/animal';
 import Button from '../components/Button/Button';
 import styles from './AnimalView.module.css';
 
@@ -66,14 +68,14 @@ export const AnimalView: React.FC = () => {
 
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
   const [photos, setPhotos] = useState<PhotoItem[]>([]);
-  const [documents, setDocuments] = useState<Record<string, DocumentItem | null>>({
-    vetPassport: null,
-    pedigree: null,
-    vetCertificate: null,
-    diplomas: null,
-    other: null,
-  });
+  const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [filesLoading, setFilesLoading] = useState(true);
+
+  // Состояние для контактов владельца
+  const [showContactsModal, setShowContactsModal] = useState(false);
+  const [ownerContacts, setOwnerContacts] = useState<AnimalOwnerContactsResponse | null>(null);
+  const [contactsLoading, setContactsLoading] = useState(false);
+  const [contactsError, setContactsError] = useState<string | null>(null);
 
   const animalId = id ? parseInt(id, 10) : 0;
 
@@ -82,6 +84,7 @@ export const AnimalView: React.FC = () => {
   });
 
   const [getFiles] = useLazyGetFilesQuery();
+  const [getOwnerContacts] = useLazyGetAnimalOwnerContactsQuery();
 
   // Загрузка файлов через API
   useEffect(() => {
@@ -116,39 +119,18 @@ export const AnimalView: React.FC = () => {
           loadedPhotos.sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0));
           setPhotos(loadedPhotos);
 
-          // Обрабатываем документы
+          // Обрабатываем документы (просто список без типов)
           const docDescriptors = filesResponse.descriptors.filter((f) => f.file_type === 'doc');
-          const docMap: Record<string, DocumentItem | null> = {
-            vetPassport: null,
-            pedigree: null,
-            vetCertificate: null,
-            diplomas: null,
-            other: null,
-          };
-
-          const animalDocs = animal.documents;
-          docDescriptors.forEach((doc) => {
+          const loadedDocs: DocumentItem[] = docDescriptors.map((doc) => {
             const mimeType = getMimeType(doc.original_filename);
-            const docItem: DocumentItem = {
+            return {
               id: doc.file_id,
               url: base64ToDataUrl(doc.content, mimeType),
               filename: doc.original_filename,
             };
-
-            if (animalDocs.vetPassportId?.toString() === doc.file_id) {
-              docMap.vetPassport = docItem;
-            } else if (animalDocs.pedigreeId?.toString() === doc.file_id) {
-              docMap.pedigree = docItem;
-            } else if (animalDocs.vetCertificatesId?.toString() === doc.file_id) {
-              docMap.vetCertificate = docItem;
-            } else if (animalDocs.diplomasId?.toString() === doc.file_id) {
-              docMap.diplomas = docItem;
-            } else if (animalDocs.otherDocumentsId?.toString() === doc.file_id) {
-              docMap.other = docItem;
-            }
           });
 
-          setDocuments(docMap);
+          setDocuments(loadedDocs);
         }
       } catch (err) {
         console.error('Failed to load files:', err);
@@ -187,14 +169,56 @@ export const AnimalView: React.FC = () => {
     navigate(`/animal/update/${animalId}`);
   };
 
-  // Обработчик клика на "Связаться"
-  const handleContact = () => {
+  // Обработчик клика на "Показать контактную информацию"
+  const handleShowContacts = async () => {
     if (!isAuthenticated) {
       navigate('/login');
       return;
     }
-    // TODO: Переход на экран связи с пользователем
-    console.log('Contact owner for animal:', animalId);
+
+    // Если контакты уже загружены - просто показываем модалку
+    if (ownerContacts) {
+      setShowContactsModal(true);
+      return;
+    }
+
+    setContactsLoading(true);
+    setContactsError(null);
+
+    try {
+      const contacts = await getOwnerContacts(animalId).unwrap();
+      setOwnerContacts(contacts);
+      setShowContactsModal(true);
+    } catch (err: any) {
+      if (err?.status === 401) {
+        setContactsError('Необходима авторизация');
+        navigate('/login');
+      } else if (err?.status === 404) {
+        setContactsError('Владелец не найден');
+      } else {
+        setContactsError('Не удалось загрузить контакты');
+      }
+    } finally {
+      setContactsLoading(false);
+    }
+  };
+
+  // Закрытие модалки контактов
+  const closeContactsModal = () => {
+    setShowContactsModal(false);
+  };
+
+  // Форматирование ФИО
+  const formatFullName = (firstName: string, secondName: string, middleName?: string) => {
+    return [secondName, firstName, middleName].filter(Boolean).join(' ');
+  };
+
+  // Маппинг типа контакта на русский
+  const contactTypeLabels: Record<string, string> = {
+    PHONE: 'Телефон',
+    EMAIL: 'Email',
+    TELEGRAM: 'Telegram',
+    VK: 'ВКонтакте',
   };
 
   // Открытие галереи
@@ -301,9 +325,18 @@ export const AnimalView: React.FC = () => {
                 Редактировать
               </Button>
             ) : (
-              <Button onClick={handleContact} className={styles.contactButton}>
-                Связаться
-              </Button>
+              <>
+                <Button
+                  onClick={handleShowContacts}
+                  className={styles.contactButton}
+                  disabled={contactsLoading}
+                >
+                  {contactsLoading ? 'Загрузка...' : 'Показать контактную информацию'}
+                </Button>
+                {contactsError && (
+                  <div className={styles.contactsError}>{contactsError}</div>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -401,63 +434,20 @@ export const AnimalView: React.FC = () => {
           <div className={styles.infoBlock}>
             <h2>Документы</h2>
             <div className={styles.documents}>
-              {documents.vetPassport && (
-                <div
-                  className={styles.documentItem}
-                  onClick={() => downloadDocument(documents.vetPassport)}
-                >
-                  <span className={styles.documentIcon}>📄</span>
-                  <span>Ветеринарный паспорт</span>
-                </div>
+              {documents.length > 0 ? (
+                documents.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className={styles.documentItem}
+                    onClick={() => downloadDocument(doc)}
+                  >
+                    <span className={styles.documentIcon}>📄</span>
+                    <span>{doc.filename}</span>
+                  </div>
+                ))
+              ) : (
+                <p className={styles.noDocuments}>Документы не загружены</p>
               )}
-
-              {documents.pedigree && (
-                <div
-                  className={styles.documentItem}
-                  onClick={() => downloadDocument(documents.pedigree)}
-                >
-                  <span className={styles.documentIcon}>📄</span>
-                  <span>Родословная (метрика)</span>
-                </div>
-              )}
-
-              {documents.vetCertificate && (
-                <div
-                  className={styles.documentItem}
-                  onClick={() => downloadDocument(documents.vetCertificate)}
-                >
-                  <span className={styles.documentIcon}>📄</span>
-                  <span>Ветеринарная справка</span>
-                </div>
-              )}
-
-              {documents.diplomas && (
-                <div
-                  className={styles.documentItem}
-                  onClick={() => downloadDocument(documents.diplomas)}
-                >
-                  <span className={styles.documentIcon}>📄</span>
-                  <span>Дипломы</span>
-                </div>
-              )}
-
-              {documents.other && (
-                <div
-                  className={styles.documentItem}
-                  onClick={() => downloadDocument(documents.other)}
-                >
-                  <span className={styles.documentIcon}>📄</span>
-                  <span>Другие документы</span>
-                </div>
-              )}
-
-              {!documents.vetPassport &&
-                !documents.pedigree &&
-                !documents.vetCertificate &&
-                !documents.diplomas &&
-                !documents.other && (
-                  <p className={styles.noDocuments}>Документы не загружены</p>
-                )}
             </div>
           </div>
         </div>
@@ -498,6 +488,70 @@ export const AnimalView: React.FC = () => {
             <div className={styles.galleryCounter}>
               {selectedPhotoIndex + 1} / {photos.length}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно с контактами владельца */}
+      {showContactsModal && ownerContacts && (
+        <div className={styles.contactsModal} onClick={closeContactsModal}>
+          <div className={styles.contactsModalContent} onClick={(e) => e.stopPropagation()}>
+            <button className={styles.contactsModalClose} onClick={closeContactsModal}>
+              &times;
+            </button>
+
+            <h2 className={styles.contactsModalTitle}>Контактная информация</h2>
+
+            {/* ФИО */}
+            <div className={styles.contactsSection}>
+              <div className={styles.contactsLabel}>ФИО владельца:</div>
+              <div className={styles.contactsValue}>
+                {formatFullName(ownerContacts.firstName, ownerContacts.secondName, ownerContacts.middleName)}
+              </div>
+            </div>
+
+            {/* Время для связи */}
+            {ownerContacts.bondTime.length > 0 && (
+              <div className={styles.contactsSection}>
+                <div className={styles.contactsLabel}>Время для связи (МСК):</div>
+                <div className={styles.contactsValue}>
+                  {ownerContacts.bondTime.map((time, index) => (
+                    <div key={index} className={styles.bondTimeItem}>
+                      {time.bondTimeStart} - {time.bondTimeEnd}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Контакты */}
+            {ownerContacts.contactInfo.length > 0 && (
+              <div className={styles.contactsSection}>
+                <div className={styles.contactsLabel}>Контакты для связи:</div>
+                <div className={styles.contactsList}>
+                  {ownerContacts.contactInfo.map((contact, index) => (
+                    <div key={index} className={styles.contactItem}>
+                      <span className={styles.contactType}>
+                        {contactTypeLabels[contact.type] || contact.type}:
+                      </span>
+                      <span className={styles.contactValue}>
+                        {contact.type === 'PHONE' ? (
+                          <a href={`tel:${contact.contact}`}>{contact.contact}</a>
+                        ) : contact.type === 'EMAIL' ? (
+                          <a href={`mailto:${contact.contact}`}>{contact.contact}</a>
+                        ) : contact.type === 'TELEGRAM' || contact.type === 'VK' ? (
+                          <a href={contact.contact} target="_blank" rel="noopener noreferrer">
+                            {contact.contact}
+                          </a>
+                        ) : (
+                          contact.contact
+                        )}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

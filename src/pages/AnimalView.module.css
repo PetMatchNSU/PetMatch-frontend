@@ -17,6 +17,10 @@
   font-size: 2rem;
   color: #50280E;
   margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .status {
@@ -183,6 +187,14 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  min-width: 0;
+}
+
+.documentItem span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .documentItem:hover {
@@ -398,5 +410,155 @@
 
   .infoLabel {
     flex: none;
+  }
+}
+
+/* Ошибка контактов */
+.contactsError {
+  color: #dc3545;
+  font-size: 14px;
+  margin-top: 10px;
+  text-align: center;
+}
+
+/* Модальное окно контактов */
+.contactsModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.contactsModalContent {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.contactsModalClose {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #666;
+  line-height: 1;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+}
+
+.contactsModalClose:hover {
+  color: #333;
+}
+
+.contactsModalTitle {
+  font-size: 1.5rem;
+  color: #50280E;
+  margin: 0 0 25px 0;
+  padding-right: 30px;
+}
+
+.contactsSection {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.contactsSection:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.contactsLabel {
+  font-weight: 500;
+  color: #50280E;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.contactsValue {
+  color: #333;
+  font-size: 16px;
+}
+
+.bondTimeItem {
+  padding: 6px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  display: inline-block;
+  margin-right: 10px;
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.contactsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.contactType {
+  font-weight: 500;
+  color: #666;
+  min-width: 100px;
+}
+
+.contactValue {
+  color: #333;
+  word-break: break-all;
+}
+
+.contactValue a {
+  color: #50280E;
+  text-decoration: none;
+}
+
+.contactValue a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .contactsModalContent {
+    padding: 20px;
+  }
+
+  .contactsModalTitle {
+    font-size: 1.3rem;
+  }
+
+  .contactItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  .contactType {
+    min-width: auto;
+    font-size: 13px;
   }
 }

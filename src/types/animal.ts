@@ -308,6 +308,31 @@ export interface FileDeleteResponse {
 }
 
 // ===========================================
+// API: GET /api/v1/animals/show/{animalId}/contacts
+// ===========================================
+
+// Время для связи
+export interface OwnerBondTime {
+  bondTimeStart: string; // HH:mm
+  bondTimeEnd: string;   // HH:mm
+}
+
+// Контакт владельца
+export interface OwnerContactInfo {
+  type: 'PHONE' | 'EMAIL' | 'TELEGRAM' | 'VK';
+  contact: string;
+}
+
+// Ответ на запрос контактов владельца
+export interface AnimalOwnerContactsResponse {
+  firstName: string;
+  secondName: string;
+  middleName?: string;
+  bondTime: OwnerBondTime[];
+  contactInfo: OwnerContactInfo[];
+}
+
+// ===========================================
 // Локальные типы для формы
 // ===========================================
 

@@ -8,10 +8,15 @@
  * - Фильтрация (TODO: отдельный Use Case)
  */
 
-import React, { useEffect, useCallback, useRef } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import FeedAnimalCard from '../components/FeedAnimalCard/FeedAnimalCard';
-import { useLazyGetAnimalsListQuery } from '../services/animalsApi';
+import {
+  useLazyGetAnimalsListQuery,
+  useLazyGetFilesQuery,
+  base64ToDataUrl,
+  getMimeType,
+} from '../services/animalsApi';
 import {
   setAnimals,
   showMoreAnimals,
@@ -41,10 +46,16 @@ import styles from './Feed.module.css';
 
 const ITEMS_PER_PAGE = 20; // Загружаем по 20, показываем по 10
 
+// Тип для хранения фотографий по animalId
+type PhotosMap = Record<number, string>; // animalId -> dataUrl
+
 export const Feed: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastCardRef = useRef<HTMLDivElement | null>(null);
+
+  // Состояние для фотографий
+  const [photosMap, setPhotosMap] = useState<PhotosMap>({});
 
   // Selectors
   const animals = useSelector(selectAnimals);
@@ -61,6 +72,7 @@ export const Feed: React.FC = () => {
 
   // RTK Query
   const [fetchAnimals] = useLazyGetAnimalsListQuery();
+  const [fetchFiles] = useLazyGetFilesQuery();
 
   // Загрузка животных
   const loadAnimals = useCallback(async (page: number, isInitial: boolean = false) => {
@@ -91,11 +103,44 @@ export const Feed: React.FC = () => {
           pagination: result.pagination,
         }));
       }
+
+      // Загружаем фото для полученных животных
+      const animalIds = result.animalsList.map((a) => a.animalId);
+      // Вызываем loadPhotos напрямую, не добавляя в зависимости
+      fetchFiles({
+        cardIds: animalIds.map((id) => id.toString()),
+      }).unwrap().then((filesResponse) => {
+        if (filesResponse.descriptors) {
+          const newPhotos: PhotosMap = {};
+          const photosByCard: Record<string, typeof filesResponse.descriptors> = {};
+
+          for (const desc of filesResponse.descriptors) {
+            if (desc.file_type === 'photo') {
+              if (!photosByCard[desc.card_id]) {
+                photosByCard[desc.card_id] = [];
+              }
+              photosByCard[desc.card_id].push(desc);
+            }
+          }
+
+          for (const [cardId, photos] of Object.entries(photosByCard)) {
+            const mainPhoto = photos.find((p) => p.is_main) || photos[0];
+            if (mainPhoto) {
+              const mimeType = getMimeType(mainPhoto.original_filename);
+              newPhotos[parseInt(cardId)] = base64ToDataUrl(mainPhoto.content, mimeType);
+            }
+          }
+
+          setPhotosMap((prev) => ({ ...prev, ...newPhotos }));
+        }
+      }).catch((err) => {
+        console.error('Failed to load photos:', err);
+      });
     } catch (err) {
       console.error('Failed to load animals:', err);
       dispatch(setError('Не удалось загрузить животных'));
     }
-  }, [dispatch, fetchAnimals, filters, sortDirection]);
+  }, [dispatch, fetchAnimals, fetchFiles, filters, sortDirection]);
 
   // Первоначальная загрузка
   useEffect(() => {
@@ -164,13 +209,14 @@ export const Feed: React.FC = () => {
   // Рендер карточки с ref для последней
   const renderCard = (animal: typeof animals[0], index: number) => {
     const isLast = index === animals.length - 1;
+    const photoUrl = photosMap[animal.animalId] || null;
 
     return (
       <div
         key={animal.animalId}
         ref={isLast ? lastCardRef : null}
       >
-        <FeedAnimalCard animal={animal} />
+        <FeedAnimalCard animal={animal} photoUrl={photoUrl} />
       </div>
     );
   };

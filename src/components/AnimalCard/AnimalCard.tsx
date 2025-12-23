@@ -2,29 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AnimalCard.module.css';
 
-interface Animal {
-  animalId: number;
-  name: string;
-  speciesName: string;
-  goal: string;
-  hasBreed: boolean;
-  breed: string | null;
-  gender: string;
-  birthday: string;
-  location: {
-    region: string;
-    city: string;
-  };
-  mainPhotoId: number;
-  createdAt: string;
-  reviewStatus: string;
-}
+import type { AnimalListItem } from '../../types/animal';
 
 interface AnimalCardProps {
-  animal: Animal;
+  animal: AnimalListItem & { reviewStatus?: string };
+  photoUrl: string | null;
 }
 
-export const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
+export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl }) => {
   const [showActions, setShowActions] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -73,12 +58,22 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal }) => {
     }
   };
 
+  // Обработчик клика на карточку
+  const handleCardClick = () => {
+    navigate(`/animal/${animal.animalId}`);
+  };
+
   return (
-    <div className={styles.card}>
-      {/* Main photo placeholder */}
+    <div className={styles.card} onClick={handleCardClick}>
+      {/* Фотография */}
       <div className={styles.card__photo}>
-        {/* In a real app, this would be an img tag with src pointing to the image */}
-        <span>Фото ID: {animal.mainPhotoId}</span>
+        {photoUrl ? (
+          <img src={photoUrl} alt={animal.name} />
+        ) : (
+          <div className={styles.card__photoPlaceholder}>
+            <span>🐾</span>
+          </div>
+        )}
       </div>
 
       {/* Status and gender in one row */}
