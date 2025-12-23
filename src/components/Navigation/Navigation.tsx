@@ -46,7 +46,7 @@ const Navigation: React.FC<NavigationProps> = ({
   const authNavItems: NavItem[] = [
     { id: 'feed', label: 'Лента', path: '/' },
     { id: 'pets', label: 'Мои питомцы', path: '/pets' },
-    { id: 'notifications', label: 'Уведомления', path: '/notifications' },
+    // { id: 'notifications', label: 'Уведомления', path: '/notifications' },
     { id: 'profile', label: 'Профиль', path: '/profile' },
     { id: 'logout', label: 'Выйти', action: handleLogout },
   ];

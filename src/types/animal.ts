@@ -226,7 +226,7 @@ export interface UpdateAnimalResponse {
 // ===========================================
 
 // Тип файла
-export type FileType = 'DOC' | 'PHOTO';
+export type FileType = 'doc' | 'photo' | 'DOC' | 'PHOTO';
 
 // Дескриптор файла для загрузки
 export interface FileUploadDescriptor {
@@ -268,13 +268,13 @@ export interface FileGetRequest {
   fileType?: FileType[];
 }
 
-// Дескриптор файла в ответе
+// Дескриптор файла в ответе (API возвращает snake_case)
 export interface FileDescriptor {
-  fileId: string;
-  fileType: FileType;
-  isMain: boolean;
-  originalFilename: string;
-  cardId: string;
+  file_id: string;
+  file_type: FileType;
+  is_main: boolean;
+  original_filename: string;
+  card_id: string;
   content: string; // Base64
 }
 

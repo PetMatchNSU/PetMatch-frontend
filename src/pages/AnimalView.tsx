@@ -85,27 +85,30 @@ export const AnimalView: React.FC = () => {
 
   // Загрузка файлов через API
   useEffect(() => {
-    if (!animal || !animalId) return;
+    if (!animal || !animalId) {
+      setFilesLoading(false);
+      return;
+    }
 
     const loadFiles = async () => {
-      setFilesLoading(true);
       try {
         const filesResponse = await getFiles({
           cardIds: [animalId.toString()],
         }).unwrap();
 
-        console.log('Files response:', filesResponse);
-
         if (filesResponse.descriptors) {
           // Обрабатываем фото
-          const photoDescriptors = filesResponse.descriptors.filter((f) => f.fileType === 'PHOTO');
-          console.log('Photo descriptors:', photoDescriptors);
+          const photoDescriptors = filesResponse.descriptors.filter((f) => f.file_type === 'photo');
+
+          // Определяем главное фото по mainPhotoId из animal
+          const mainPhotoId = animal.photos.mainPhotoId?.toString();
+
           const loadedPhotos: PhotoItem[] = photoDescriptors.map((photo) => {
-            const mimeType = getMimeType(photo.originalFilename);
+            const mimeType = getMimeType(photo.original_filename);
             return {
-              id: photo.fileId,
+              id: photo.file_id,
               url: base64ToDataUrl(photo.content, mimeType),
-              isMain: photo.isMain,
+              isMain: photo.file_id === mainPhotoId,
             };
           });
 
@@ -114,7 +117,7 @@ export const AnimalView: React.FC = () => {
           setPhotos(loadedPhotos);
 
           // Обрабатываем документы
-          const docDescriptors = filesResponse.descriptors.filter((f) => f.fileType === 'DOC');
+          const docDescriptors = filesResponse.descriptors.filter((f) => f.file_type === 'doc');
           const docMap: Record<string, DocumentItem | null> = {
             vetPassport: null,
             pedigree: null,
@@ -125,22 +128,22 @@ export const AnimalView: React.FC = () => {
 
           const animalDocs = animal.documents;
           docDescriptors.forEach((doc) => {
-            const mimeType = getMimeType(doc.originalFilename);
+            const mimeType = getMimeType(doc.original_filename);
             const docItem: DocumentItem = {
-              id: doc.fileId,
+              id: doc.file_id,
               url: base64ToDataUrl(doc.content, mimeType),
-              filename: doc.originalFilename,
+              filename: doc.original_filename,
             };
 
-            if (animalDocs.vetPassportId?.toString() === doc.fileId) {
+            if (animalDocs.vetPassportId?.toString() === doc.file_id) {
               docMap.vetPassport = docItem;
-            } else if (animalDocs.pedigreeId?.toString() === doc.fileId) {
+            } else if (animalDocs.pedigreeId?.toString() === doc.file_id) {
               docMap.pedigree = docItem;
-            } else if (animalDocs.vetCertificatesId?.toString() === doc.fileId) {
+            } else if (animalDocs.vetCertificatesId?.toString() === doc.file_id) {
               docMap.vetCertificate = docItem;
-            } else if (animalDocs.diplomasId?.toString() === doc.fileId) {
+            } else if (animalDocs.diplomasId?.toString() === doc.file_id) {
               docMap.diplomas = docItem;
-            } else if (animalDocs.otherDocumentsId?.toString() === doc.fileId) {
+            } else if (animalDocs.otherDocumentsId?.toString() === doc.file_id) {
               docMap.other = docItem;
             }
           });
