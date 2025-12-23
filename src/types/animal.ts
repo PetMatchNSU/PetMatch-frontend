@@ -14,6 +14,12 @@ export interface Species {
   name: string;
 }
 
+// Цель размещения (из API)
+export interface Goal {
+  id: number;
+  name: AnimalGoal;
+}
+
 // Порода
 export interface Breed {
   id: number;
@@ -110,4 +116,215 @@ export interface FileQueryParams {
   fileId: number;
   width?: number;
   height?: number;
+}
+
+// ===========================================
+// API: GET /api/v1/animals/info
+// ===========================================
+
+// Ответ на запрос информации о видах и целях
+export interface AnimalInfoResponse {
+  species: Species[];
+  goals: Goal[];
+}
+
+// ===========================================
+// API: POST /api/v1/animals/create
+// ===========================================
+
+// Запрос на создание животного
+export interface CreateAnimalRequest {
+  name: string;
+  speciesId: number;
+  goal: AnimalGoal;
+  cost?: number | null; // только если goal = 'SELL'
+  hasBreed: boolean;
+  breed?: string; // только если hasBreed = true
+  gender: AnimalGender;
+  birthday: string; // формат YYYY-MM-DD
+  weight?: number | null;
+  color: string;
+  geneticDiseases: string;
+  description?: string;
+}
+
+// Ответ на создание животного
+export interface CreateAnimalResponse {
+  animalId: number;
+  status: string;
+}
+
+// ===========================================
+// API: GET /api/v1/animals/show/{animalId}
+// ===========================================
+
+// Фотографии животного
+export interface AnimalPhotos {
+  mainPhotoId: number | null;
+  additionalIds: number[];
+}
+
+// Документы животного
+export interface AnimalDocuments {
+  vetPassportId: number | null;
+  pedigreeId: number | null;
+  vetCertificatesId: number | null;
+  diplomasId: number | null;
+  otherDocumentsId: number | null;
+}
+
+// Полная информация о животном (ответ GET /api/v1/animals/show/{id})
+export interface AnimalDetailResponse {
+  canEdit: boolean;
+  name: string;
+  species: Species;
+  goal: AnimalGoal;
+  cost?: number | null;
+  hasBreed: boolean;
+  breed?: string | null;
+  gender: AnimalGender;
+  birthday: string; // формат YYYY-MM-DD
+  weight?: number | null;
+  color: string;
+  geneticDiseases: string;
+  description?: string;
+  reviewStatus: AnimalReviewStatus;
+  photos: AnimalPhotos;
+  documents: AnimalDocuments;
+  createdAt: string; // ISO date string
+  updatedAt: string; // ISO date string
+}
+
+// ===========================================
+// API: PUT /api/v1/animals/update?animalId
+// ===========================================
+
+// Запрос на обновление животного (аналогичен CreateAnimalRequest)
+export interface UpdateAnimalRequest {
+  name: string;
+  speciesId: number;
+  goal: AnimalGoal;
+  cost?: number | null;
+  hasBreed: boolean;
+  breed?: string;
+  gender: AnimalGender;
+  birthday: string;
+  weight?: number | null;
+  color: string;
+  geneticDiseases: string;
+  description?: string;
+}
+
+// Ответ на обновление животного
+export interface UpdateAnimalResponse {
+  animal_id: number;
+  status: string;
+}
+
+// ===========================================
+// API: Файлы (POST /api/v1/files/upload)
+// ===========================================
+
+// Тип файла
+export type FileType = 'DOC' | 'PHOTO';
+
+// Дескриптор файла для загрузки
+export interface FileUploadDescriptor {
+  originalFilename: string;
+  isMain: boolean;
+  fileType: FileType;
+}
+
+// Метаданные для загрузки файлов
+export interface FileUploadMetadata {
+  // cardId: number;
+  descriptors: FileUploadDescriptor[];
+}
+
+// Статус загрузки
+export type UploadingStatus = 'ok' | 'not_valid' | 'internal_error';
+
+// Дескриптор результата загрузки
+export interface FileUploadResultDescriptor {
+  originalFilename: string;
+  uploadingStatus: UploadingStatus;
+  fileId?: string;
+}
+
+// Ответ на загрузку файлов
+export interface FileUploadResponse {
+  descriptors: FileUploadResultDescriptor[];
+}
+
+// ===========================================
+// API: Файлы (GET /api/v1/files?query=...)
+// ===========================================
+
+// Запрос на получение файлов
+export interface FileGetRequest {
+  fileIds?: string[];
+  cardIds?: string[];
+  isMain?: boolean;
+  fileType?: FileType[];
+}
+
+// Дескриптор файла в ответе
+export interface FileDescriptor {
+  fileId: string;
+  fileType: FileType;
+  isMain: boolean;
+  originalFilename: string;
+  cardId: string;
+  content: string; // Base64
+}
+
+// Ответ на получение файлов
+export interface FileGetResponse {
+  descriptors: FileDescriptor[];
+}
+
+// ===========================================
+// API: Файлы (DELETE /api/v1/files)
+// ===========================================
+
+// Запрос на удаление файлов
+export interface FileDeleteRequest {
+  fileIds?: string[];
+  cardIds?: string[];
+}
+
+// Статус удаления
+export type DeletingStatus = 'deleted' | 'internal_error';
+
+// Дескриптор результата удаления
+export interface FileDeleteResultDescriptor {
+  fileId: string;
+  deletingStatus: DeletingStatus;
+}
+
+// Ответ на удаление файлов
+export interface FileDeleteResponse {
+  descriptors: FileDeleteResultDescriptor[];
+}
+
+// ===========================================
+// Локальные типы для формы
+// ===========================================
+
+// Типы документов (для UI)
+export type DocumentType = 'vetPassport' | 'pedigree' | 'vetCertificate' | 'diplomas' | 'other';
+
+// Локальный файл (для формы)
+export interface LocalFile {
+  id: string; // fileId от сервера или временный ID
+  file: File | null;
+  url: string; // URL для превью (blob: или data:)
+  isDeleted: boolean;
+  isNew: boolean; // true если файл только что загружен и ещё не на сервере
+  originalFilename?: string;
+}
+
+// Локальный документ (для формы)
+export interface LocalDocument extends LocalFile {
+  type: DocumentType;
 }

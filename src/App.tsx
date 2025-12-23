@@ -17,6 +17,7 @@ import Login from './pages/Login';
 import Pets from './pages/Pets';
 import { Feed } from './pages/Feed';
 import EditPet from './pages/EditPet';
+import AnimalView from './pages/AnimalView';
 import EmailVerification from './pages/EmailVerification';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
@@ -42,6 +43,7 @@ function App() {
           <Route path="/verify-email" element={<EmailVerification />} />
           <Route path="/terms/tos" element={<TermsOfService />} />
           <Route path="/terms/toa" element={<PrivacyPolicy />} />
+          <Route path="/animal/:id" element={<AnimalView />} />
 
           {/* Защищенные роуты - требуют авторизации */}
           <Route

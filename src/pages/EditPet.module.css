@@ -61,6 +61,29 @@
   width: 100%;
 }
 
+.fieldError {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #AC7F5E;
+  border-radius: 6px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 100px;
+  box-sizing: border-box;
+}
+
+.textarea:focus {
+  outline: none;
+  border-color: #50280E;
+}
+
 .breedQuestion {
   align-items: center;
 }

@@ -1,0 +1,402 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.title {
+  font-size: 2rem;
+  color: #50280E;
+  margin: 0;
+}
+
+.status {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.statusChecking {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.statusPublished {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
+}
+
+.statusBlocked {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #dc3545;
+}
+
+.content {
+  display: flex;
+  gap: 30px;
+}
+
+/* Фото секция */
+.photoSection {
+  flex: 0 0 400px;
+}
+
+.mainPhoto {
+  width: 100%;
+  height: 350px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  border: 1px solid #ddd;
+}
+
+.mainPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 18px;
+}
+
+.additionalPhotos {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  flex-wrap: wrap;
+}
+
+.additionalPhoto {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 1px solid #ddd;
+  transition: transform 0.2s ease;
+}
+
+.additionalPhoto:hover {
+  transform: scale(1.05);
+}
+
+.additionalPhoto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.actions {
+  margin-top: 20px;
+}
+
+.editButton,
+.contactButton {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 16px;
+}
+
+/* Информационная секция */
+.infoSection {
+  flex: 1;
+}
+
+.infoBlock {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.infoBlock h2 {
+  font-size: 1.2rem;
+  color: #50280E;
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.infoRow {
+  display: flex;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoLabel {
+  flex: 0 0 180px;
+  color: #666;
+  font-weight: 500;
+}
+
+.infoValue {
+  flex: 1;
+  color: #333;
+}
+
+.description {
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+/* Документы */
+.documents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.documentItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.documentItem:hover {
+  background: #e9ecef;
+}
+
+.documentIcon {
+  font-size: 20px;
+}
+
+.noDocuments {
+  color: #999;
+  font-style: italic;
+  margin: 0;
+}
+
+/* Галерея */
+.gallery {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.galleryContent {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.galleryImage {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.galleryClose {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 36px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.galleryNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 48px;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.galleryNav:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.galleryPrev {
+  left: -80px;
+}
+
+.galleryNext {
+  right: -80px;
+}
+
+.galleryCounter {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 16px;
+}
+
+/* Загрузка и ошибка */
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #50280E;
+  font-size: 16px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #CDB49F;
+  border-top-color: #50280E;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Адаптивность */
+@media (max-width: 900px) {
+  .content {
+    flex-direction: column;
+  }
+
+  .photoSection {
+    flex: none;
+    width: 100%;
+  }
+
+  .mainPhoto {
+    height: 300px;
+  }
+
+  .additionalPhoto {
+    width: 70px;
+    height: 70px;
+  }
+
+  .galleryPrev {
+    left: 10px;
+  }
+
+  .galleryNext {
+    right: 10px;
+  }
+
+  .galleryNav {
+    font-size: 32px;
+    padding: 8px 15px;
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 15px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .mainPhoto {
+    height: 250px;
+  }
+
+  .infoLabel {
+    flex: 0 0 140px;
+    font-size: 14px;
+  }
+
+  .infoValue {
+    font-size: 14px;
+  }
+
+  .infoBlock {
+    padding: 15px;
+  }
+
+  .infoBlock h2 {
+    font-size: 1.1rem;
+  }
+
+  .status {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  .additionalPhoto {
+    width: 60px;
+    height: 60px;
+  }
+
+  .documentItem {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 400px) {
+  .infoRow {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .infoLabel {
+    flex: none;
+  }
+}
