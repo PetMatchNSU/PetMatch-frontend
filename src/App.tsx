@@ -9,8 +9,9 @@
  * - Навигационное меню
  */
 
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { ProtectedRoute } from './components/ProtectedRoute/ProtectedRoute';
 import { Registration } from './pages/Registration';
 import Login from './pages/Login';
@@ -23,11 +24,21 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Profile from './pages/Profile';
 import Navigation from './components/Navigation/Navigation';
-import { selectIsAuthenticated } from './store/authSelectors';
+import { selectIsAuthenticated, selectIsInitialized } from './store/authSelectors';
+import { initializeAuth } from './store/authSlice';
 import './App.css';
 
 function App() {
+  const dispatch = useDispatch();
   const isAuthenticated = useSelector(selectIsAuthenticated);
+  const isInitialized = useSelector(selectIsInitialized);
+
+  // Инициализация auth при загрузке приложения
+  useEffect(() => {
+    if (!isInitialized) {
+      dispatch(initializeAuth());
+    }
+  }, [dispatch, isInitialized]);
 
   return (
     <div className="App">

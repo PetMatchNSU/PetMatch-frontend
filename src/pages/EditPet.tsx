@@ -181,14 +181,8 @@ const EditPet: React.FC = () => {
   const [mainPhoto, setMainPhoto] = useState<LocalFile | null>(null);
   const [additionalPhotos, setAdditionalPhotos] = useState<LocalFile[]>([]);
 
-  // Документы
-  const [documents, setDocuments] = useState<Record<DocumentType, LocalDocument | null>>({
-    vetPassport: null,
-    pedigree: null,
-    vetCertificate: null,
-    diplomas: null,
-    other: null,
-  });
+  // Документы (теперь просто массив)
+  const [documents, setDocuments] = useState<LocalFile[]>([]);
 
   // UI состояния
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -239,78 +233,56 @@ const EditPet: React.FC = () => {
 
           if (filesResponse.descriptors) {
             // Обрабатываем фото
-            const photos = filesResponse.descriptors.filter((f) => f.fileType === 'PHOTO');
-            const mainPhotoDesc = photos.find((p) => p.isMain);
-            const additionalPhotosDesc = photos.filter((p) => !p.isMain);
+            const photos = filesResponse.descriptors.filter((f) => f.file_type === 'photo');
+
+            // Определяем главное фото по mainPhotoId из animalData
+            const mainPhotoId = animalData.photos.mainPhotoId?.toString();
+            const mainPhotoDesc = photos.find((p) => p.file_id === mainPhotoId);
+            const additionalPhotosDesc = photos.filter((p) => p.file_id !== mainPhotoId);
 
             if (mainPhotoDesc) {
-              const mimeType = getMimeType(mainPhotoDesc.originalFilename);
+              const mimeType = getMimeType(mainPhotoDesc.original_filename);
               setMainPhoto({
-                id: mainPhotoDesc.fileId,
+                id: mainPhotoDesc.file_id,
                 file: null,
                 url: base64ToDataUrl(mainPhotoDesc.content, mimeType),
                 isDeleted: false,
                 isNew: false,
-                originalFilename: mainPhotoDesc.originalFilename,
+                originalFilename: mainPhotoDesc.original_filename,
               });
             }
 
             if (additionalPhotosDesc.length > 0) {
               setAdditionalPhotos(
                 additionalPhotosDesc.map((photo) => {
-                  const mimeType = getMimeType(photo.originalFilename);
+                  const mimeType = getMimeType(photo.original_filename);
                   return {
-                    id: photo.fileId,
+                    id: photo.file_id,
                     file: null,
                     url: base64ToDataUrl(photo.content, mimeType),
                     isDeleted: false,
                     isNew: false,
-                    originalFilename: photo.originalFilename,
+                    originalFilename: photo.original_filename,
                   };
                 })
               );
             }
 
-            // Обрабатываем документы
-            const docs = filesResponse.descriptors.filter((f) => f.fileType === 'DOC');
-            // Документы в API не имеют типа (vetPassport, pedigree и т.д.),
-            // поэтому используем данные из animalData для маппинга
-            const docMap: Record<DocumentType, LocalDocument | null> = {
-              vetPassport: null,
-              pedigree: null,
-              vetCertificate: null,
-              diplomas: null,
-              other: null,
-            };
-
-            // Маппинг по fileId из animalData
-            const animalDocs = animalData.documents;
-            docs.forEach((doc) => {
-              const mimeType = getMimeType(doc.originalFilename);
-              const baseDoc: LocalDocument = {
-                id: doc.fileId,
+            // Обрабатываем документы (просто список без типов)
+            const docs = filesResponse.descriptors.filter((f) => f.file_type === 'doc');
+            const loadedDocs: LocalFile[] = docs.map((doc) => {
+              const mimeType = getMimeType(doc.original_filename);
+              return {
+                id: doc.file_id,
                 file: null,
                 url: base64ToDataUrl(doc.content, mimeType),
                 isDeleted: false,
                 isNew: false,
-                originalFilename: doc.originalFilename,
-                type: 'other',
+                originalFilename: doc.original_filename,
               };
-
-              if (animalDocs.vetPassportId?.toString() === doc.fileId) {
-                docMap.vetPassport = { ...baseDoc, type: 'vetPassport' };
-              } else if (animalDocs.pedigreeId?.toString() === doc.fileId) {
-                docMap.pedigree = { ...baseDoc, type: 'pedigree' };
-              } else if (animalDocs.vetCertificatesId?.toString() === doc.fileId) {
-                docMap.vetCertificate = { ...baseDoc, type: 'vetCertificate' };
-              } else if (animalDocs.diplomasId?.toString() === doc.fileId) {
-                docMap.diplomas = { ...baseDoc, type: 'diplomas' };
-              } else if (animalDocs.otherDocumentsId?.toString() === doc.fileId) {
-                docMap.other = { ...baseDoc, type: 'other' };
-              }
             });
 
-            setDocuments(docMap);
+            setDocuments(loadedDocs);
           }
         } catch (err) {
           console.error('Failed to load files:', err);
@@ -445,7 +417,7 @@ const EditPet: React.FC = () => {
   };
 
   // Загрузка документа
-  const handleDocumentUpload = (type: DocumentType, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDocumentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -455,29 +427,30 @@ const EditPet: React.FC = () => {
       return;
     }
 
-    setDocuments((prev) => ({
+    setDocuments((prev) => [
       ...prev,
-      [type]: {
+      {
         id: Date.now().toString(),
         file,
         url: URL.createObjectURL(file),
         isDeleted: false,
         isNew: true,
-        type,
+        originalFilename: file.name,
       },
-    }));
+    ]);
   };
 
   // Удаление документа
-  const removeDocument = (type: DocumentType) => {
-    setDocuments((prev) => {
-      const doc = prev[type];
-      if (!doc) return prev;
-      if (doc.isNew) {
-        return { ...prev, [type]: null };
-      }
-      return { ...prev, [type]: { ...doc, isDeleted: true } };
-    });
+  const removeDocument = (docId: string) => {
+    setDocuments((prev) =>
+      prev.map((doc) =>
+        doc.id === docId
+          ? doc.isNew
+            ? { ...doc, isDeleted: true }
+            : { ...doc, isDeleted: true }
+          : doc
+      ).filter((doc) => !(doc.isNew && doc.isDeleted))
+    );
   };
 
   // Валидация формы
@@ -572,11 +545,12 @@ const EditPet: React.FC = () => {
       let savedAnimalId: number;
 
       if (isEditMode) {
-        const result = await updateAnimal({
+        await updateAnimal({
           animalId,
           data: requestData as UpdateAnimalRequest,
         }).unwrap();
-        savedAnimalId = result.animal_id;
+        // При редактировании используем существующий animalId
+        savedAnimalId = animalId;
       } else {
         const result = await createAnimal(requestData as CreateAnimalRequest).unwrap();
         savedAnimalId = result.animalId;
@@ -592,7 +566,7 @@ const EditPet: React.FC = () => {
         descriptors.push({
           originalFilename: mainPhoto.file.name,
           isMain: true,
-          fileType: 'PHOTO' as FileType,
+          fileType: 'photo',
         });
       }
 
@@ -603,19 +577,19 @@ const EditPet: React.FC = () => {
           descriptors.push({
             originalFilename: photo.file.name,
             isMain: false,
-            fileType: 'PHOTO' as FileType,
+            fileType: 'PHOTO',
           });
         }
       }
 
       // Документы
-      for (const doc of Object.values(documents)) {
-        if (doc?.isNew && doc.file && !doc.isDeleted) {
+      for (const doc of documents) {
+        if (doc.isNew && doc.file && !doc.isDeleted) {
           filesToUpload.push(doc.file);
           descriptors.push({
             originalFilename: doc.file.name,
             isMain: false,
-            fileType: 'DOC' as FileType,
+            fileType: 'DOC',
           });
         }
       }
@@ -647,8 +621,8 @@ const EditPet: React.FC = () => {
       }
 
       // Удаленные документы
-      for (const doc of Object.values(documents)) {
-        if (doc?.isDeleted && !doc.isNew) {
+      for (const doc of documents) {
+        if (doc.isDeleted && !doc.isNew) {
           fileIdsToDelete.push(doc.id);
         }
       }
@@ -970,173 +944,43 @@ const EditPet: React.FC = () => {
                   <div className={styles.label}>Документы</div>
                   <div className={styles.inputWrapper}>
                     <div className={styles.documentSection}>
-                      {/* Ветеринарный паспорт */}
-                      <div className={styles.documentItem}>
-                        <div className={styles.documentLabel}>Ветеринарный паспорт</div>
-                        <div className={styles.documentUpload}>
-                          {documents.vetPassport && !documents.vetPassport.isDeleted ? (
-                            <div className={styles.documentPreview}>
-                              <div className={styles.documentName}>
-                                {documents.vetPassport.file?.name || 'vet_passport.pdf'}
+                      {/* Список загруженных документов */}
+                      {documents
+                        .filter((doc) => !doc.isDeleted)
+                        .map((doc) => (
+                          <div key={doc.id} className={styles.documentItem}>
+                            <div className={styles.documentUpload}>
+                              <div className={styles.documentPreview}>
+                                <div className={styles.documentName}>
+                                  {doc.file?.name || doc.originalFilename || 'document'}
+                                </div>
+                                <button
+                                  type="button"
+                                  className={styles.removeDocument}
+                                  onClick={() => removeDocument(doc.id)}
+                                >
+                                  &times;
+                                </button>
                               </div>
-                              <button
-                                type="button"
-                                className={styles.removeDocument}
-                                onClick={() => removeDocument('vetPassport')}
-                              >
-                                &times;
-                              </button>
                             </div>
-                          ) : (
-                            <div className={styles.documentPlaceholder}>
-                              <input
-                                type="file"
-                                onChange={(e) => handleDocumentUpload('vetPassport', e)}
-                                style={{ display: 'none' }}
-                                id="vet-passport-upload"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              />
-                              <label htmlFor="vet-passport-upload" className={styles.uploadButton}>
-                                Загрузить
-                              </label>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                          </div>
+                        ))}
 
-                      {/* Родословная */}
+                      {/* Кнопка добавления документа */}
                       <div className={styles.documentItem}>
-                        <div className={styles.documentLabel}>Родословная (метрика)</div>
                         <div className={styles.documentUpload}>
-                          {documents.pedigree && !documents.pedigree.isDeleted ? (
-                            <div className={styles.documentPreview}>
-                              <div className={styles.documentName}>
-                                {documents.pedigree.file?.name || 'pedigree.pdf'}
-                              </div>
-                              <button
-                                type="button"
-                                className={styles.removeDocument}
-                                onClick={() => removeDocument('pedigree')}
-                              >
-                                &times;
-                              </button>
-                            </div>
-                          ) : (
-                            <div className={styles.documentPlaceholder}>
-                              <input
-                                type="file"
-                                onChange={(e) => handleDocumentUpload('pedigree', e)}
-                                style={{ display: 'none' }}
-                                id="pedigree-upload"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              />
-                              <label htmlFor="pedigree-upload" className={styles.uploadButton}>
-                                Загрузить
-                              </label>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Ветеринарная справка */}
-                      <div className={styles.documentItem}>
-                        <div className={styles.documentLabel}>Ветеринарная справка</div>
-                        <div className={styles.documentUpload}>
-                          {documents.vetCertificate && !documents.vetCertificate.isDeleted ? (
-                            <div className={styles.documentPreview}>
-                              <div className={styles.documentName}>
-                                {documents.vetCertificate.file?.name || 'vet_certificate.pdf'}
-                              </div>
-                              <button
-                                type="button"
-                                className={styles.removeDocument}
-                                onClick={() => removeDocument('vetCertificate')}
-                              >
-                                &times;
-                              </button>
-                            </div>
-                          ) : (
-                            <div className={styles.documentPlaceholder}>
-                              <input
-                                type="file"
-                                onChange={(e) => handleDocumentUpload('vetCertificate', e)}
-                                style={{ display: 'none' }}
-                                id="vet-certificate-upload"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              />
-                              <label htmlFor="vet-certificate-upload" className={styles.uploadButton}>
-                                Загрузить
-                              </label>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Дипломы */}
-                      <div className={styles.documentItem}>
-                        <div className={styles.documentLabel}>Дипломы</div>
-                        <div className={styles.documentUpload}>
-                          {documents.diplomas && !documents.diplomas.isDeleted ? (
-                            <div className={styles.documentPreview}>
-                              <div className={styles.documentName}>
-                                {documents.diplomas.file?.name || 'diplomas.pdf'}
-                              </div>
-                              <button
-                                type="button"
-                                className={styles.removeDocument}
-                                onClick={() => removeDocument('diplomas')}
-                              >
-                                &times;
-                              </button>
-                            </div>
-                          ) : (
-                            <div className={styles.documentPlaceholder}>
-                              <input
-                                type="file"
-                                onChange={(e) => handleDocumentUpload('diplomas', e)}
-                                style={{ display: 'none' }}
-                                id="diplomas-upload"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              />
-                              <label htmlFor="diplomas-upload" className={styles.uploadButton}>
-                                Загрузить
-                              </label>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Другое */}
-                      <div className={styles.documentItem}>
-                        <div className={styles.documentLabel}>Другое</div>
-                        <div className={styles.documentUpload}>
-                          {documents.other && !documents.other.isDeleted ? (
-                            <div className={styles.documentPreview}>
-                              <div className={styles.documentName}>
-                                {documents.other.file?.name || 'other.pdf'}
-                              </div>
-                              <button
-                                type="button"
-                                className={styles.removeDocument}
-                                onClick={() => removeDocument('other')}
-                              >
-                                &times;
-                              </button>
-                            </div>
-                          ) : (
-                            <div className={styles.documentPlaceholder}>
-                              <input
-                                type="file"
-                                onChange={(e) => handleDocumentUpload('other', e)}
-                                style={{ display: 'none' }}
-                                id="other-upload"
-                                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                              />
-                              <label htmlFor="other-upload" className={styles.uploadButton}>
-                                Загрузить
-                              </label>
-                            </div>
-                          )}
+                          <div className={styles.documentPlaceholder}>
+                            <input
+                              type="file"
+                              onChange={handleDocumentUpload}
+                              style={{ display: 'none' }}
+                              id="document-upload"
+                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                            />
+                            <label htmlFor="document-upload" className={styles.uploadButton}>
+                              + Добавить документ
+                            </label>
+                          </div>
                         </div>
                       </div>
                     </div>
