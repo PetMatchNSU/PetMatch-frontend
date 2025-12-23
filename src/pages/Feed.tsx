@@ -181,13 +181,13 @@ export const Feed: React.FC = () => {
         {/* Заголовок и сортировка */}
         <div className={styles.feed__header}>
           <h1 className={styles.feed__title}>Лента</h1>
-          <button
+          {/* <button
             className={styles.feed__sortButton}
             onClick={handleSortToggle}
             disabled={isLoading}
           >
             {sortDirection === 'desc' ? 'Сначала новые ↓' : 'Сначала старые ↑'}
-          </button>
+          </button> */}
         </div>
 
         {/* Ошибка */}
