@@ -133,11 +133,26 @@ const getUserId = (): number | null => {
   if (!payload) {
     return null;
   }
-  console.log(payload);
-  console.log(payload.userID)
 
   // userId может быть в разных полях в зависимости от бэкенда
   return payload.userID;
+};
+
+/**
+ * Получает email из access token
+ */
+const getEmail = (): string | null => {
+  const accessToken = getAccessToken();
+  if (!accessToken) {
+    return null;
+  }
+
+  const payload = decodeToken(accessToken);
+  if (!payload) {
+    return null;
+  }
+
+  return payload.email || null;
 };
 
 export const tokenManager = {
@@ -150,4 +165,5 @@ export const tokenManager = {
   isTokenExpired,
   decodeToken,
   getUserId,
+  getEmail,
 };

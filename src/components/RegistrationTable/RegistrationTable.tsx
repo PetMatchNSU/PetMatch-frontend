@@ -112,21 +112,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
     });
 
     setLocalState(newState);
-  }, [contactInfo]);
-
-  // Синхронизация email при изменении userEmail
-  useEffect(() => {
-    setLocalState((prev) => {
-      const newState = {
-        ...prev,
-        email: { contact: userEmail || '', visible: true },
-      };
-      // Уведомляем родителя об изменении
-      const { isValid } = validate(newState);
-      onChange(convertToContactInfoArray(newState), isValid);
-      return newState;
-    });
-  }, [userEmail]);
+  }, [contactInfo, userEmail]);
 
   const convertToContactInfoArray = (state: LocalContactState): ContactInfo[] => {
     const result: ContactInfo[] = [];

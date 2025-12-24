@@ -12,9 +12,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import { useSelector } from 'react-redux';
 import type { SingleValue } from 'react-select';
-import { selectUser } from '../store/authSelectors';
 import { useGetUserProfileQuery, useUpdateUserProfileMutation, useLazySearchCitiesQuery } from '../services/userApi';
 import type { BondTime, ContactInfoItem, Gender } from '../types/user';
 import type { ContactInfo } from '../types/auth';
@@ -25,7 +23,7 @@ import Select from '../components/Select/Select';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
 import styles from './Profile.module.css';
-import { selectContactInfo } from '../store/profileSelectors';
+import { tokenManager } from '../utils/tokenManager';
 
 // Префиксы для контактов (должны совпадать с RegistrationTable)
 const CONTACT_PREFIXES: Record<string, string> = {
@@ -97,13 +95,8 @@ interface ProfileFormData {
 }
 
 const Profile: React.FC = () => {
-  // Redux
-  const user = useSelector(selectUser);
-  const profileContactInfo = useSelector(selectContactInfo);
-  console.log(user);
-  console.log(profileContactInfo)
-  const userEmail = user?.email || '';
-  // const userContactEmail = profileContactInfo[0]?.contact || ''
+  // Email из токена
+  const userEmail = tokenManager.getEmail() || '';
 
   // RTK Query
   const { data: profile, isLoading, error: loadError, refetch } = useGetUserProfileQuery();
@@ -123,7 +116,6 @@ const Profile: React.FC = () => {
   const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
   const [isContactInfoValid, setIsContactInfoValid] = useState(true);
   const [isBondTimeValid, setIsBondTimeValid] = useState(true);
-  const [contactEmail, setContactEmail] = useState('');
 
   // React Hook Form
   const {
@@ -186,11 +178,7 @@ const Profile: React.FC = () => {
     })) || [];
     setContactInfo(contacts);
     setIsContactInfoValid(contacts.length > 0);
-
-    // Извлекаем email из контактов профиля
-    const emailContact = profile.contactInfo?.find((item: ContactInfoItem) => item.type === 'EMAIL');
-    setContactEmail(emailContact?.contact || userEmail || '');
-  }, [profile, reset, userEmail]);
+  }, [profile, reset]);
 
   // Загрузка данных профиля
   useEffect(() => {
@@ -483,7 +471,7 @@ const Profile: React.FC = () => {
             <RegistrationTable
               contactInfo={contactInfo}
               onChange={handleContactInfoChange}
-              userEmail={contactEmail}
+              userEmail={userEmail}
               viewMode={!isEditing}
               disabled={!isEditing}
               error={!isContactInfoValid && isEditing ? 'Укажите хотя бы один способ связи' : undefined}
