@@ -229,8 +229,14 @@ const EditPet: React.FC = () => {
           }).unwrap();
 
           if (filesResponse.descriptors) {
+            // Фильтруем только файлы, принадлежащие текущему животному
+            const animalIdStr = animalId.toString();
+            const validDescriptors = filesResponse.descriptors.filter(
+              (f) => f.card_id === animalIdStr
+            );
+
             // Обрабатываем фото
-            const photos = filesResponse.descriptors.filter((f) => f.file_type === 'photo');
+            const photos = validDescriptors.filter((f) => f.file_type === 'photo');
 
             // Определяем главное фото по mainPhotoId из animalData
             const mainPhotoId = animalData.photos.mainPhotoId?.toString();
@@ -266,7 +272,7 @@ const EditPet: React.FC = () => {
             }
 
             // Обрабатываем документы (просто список без типов)
-            const docs = filesResponse.descriptors.filter((f) => f.file_type === 'doc');
+            const docs = validDescriptors.filter((f) => f.file_type === 'doc');
             const loadedDocs: LocalFile[] = docs.map((doc) => {
               const mimeType = getMimeType(doc.original_filename);
               return {
@@ -563,7 +569,7 @@ const EditPet: React.FC = () => {
         descriptors.push({
           originalFilename: mainPhoto.file.name,
           isMain: true,
-          fileType: 'photo',
+          fileType: 'PHOTO',
         });
       }
 

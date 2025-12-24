@@ -66,6 +66,28 @@
   background-color: #A3CFBB;
 }
 
+.card__status_blocked {
+  background-color: #F1AEB5;
+}
+
+.card__status_checking {
+  background-color: #FFE69C;
+}
+
+.card__reviewComment {
+  font-size: 0.75rem;
+  color: #721c24;
+  background-color: #f8d7da;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #f5c6cb;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
 .card__gender {
   display: inline-block;
   width: 28px;
