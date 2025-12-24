@@ -87,8 +87,7 @@ export const base64ToDataUrl = (content: string, mimeType: string = 'image/png')
 export const getMimeType = (filename: string): string => {
   const ext = filename.toLowerCase().split('.').pop();
   const mimeTypes: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
+    jpg: 'image/jpg',
     png: 'image/png',
     gif: 'image/gif',
     pdf: 'application/pdf',

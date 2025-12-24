@@ -146,8 +146,8 @@ const validateCost = (cost: number | null): string | null => {
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
-const ALLOWED_DOC_TYPES = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png'];
+const ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.png', '.pdf'];
+const ALLOWED_DOC_EXTENSIONS = ['.pdf', '.jpg', '.png'];
 
 const EditPet: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -339,8 +339,10 @@ const EditPet: React.FC = () => {
   };
 
   // Валидация файла
-  const validateFile = (file: File, allowedTypes: string[]): string | null => {
-    if (!allowedTypes.includes(file.type)) {
+  const validateFile = (file: File, allowedExtensions: string[]): string | null => {
+    const fileName = file.name.toLowerCase();
+    const hasAllowedExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+    if (!hasAllowedExtension) {
       return 'Недопустимый формат файла';
     }
     if (file.size > MAX_FILE_SIZE) {
@@ -354,7 +356,7 @@ const EditPet: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const error = validateFile(file, ALLOWED_IMAGE_TYPES);
+    const error = validateFile(file, ALLOWED_IMAGE_EXTENSIONS);
     if (error) {
       setToast({ message: error, type: 'error' });
       return;
@@ -390,7 +392,7 @@ const EditPet: React.FC = () => {
       return;
     }
 
-    const error = validateFile(file, ALLOWED_IMAGE_TYPES);
+    const error = validateFile(file, ALLOWED_IMAGE_EXTENSIONS);
     if (error) {
       setToast({ message: error, type: 'error' });
       return;
@@ -424,7 +426,7 @@ const EditPet: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const error = validateFile(file, ALLOWED_DOC_TYPES);
+    const error = validateFile(file, ALLOWED_DOC_EXTENSIONS);
     if (error) {
       setToast({ message: error, type: 'error' });
       return;
@@ -888,7 +890,7 @@ const EditPet: React.FC = () => {
                         <div className={styles.photoPlaceholder}>
                           <input
                             type="file"
-                            accept="image/jpeg,image/jpg,image/png"
+                            accept="image/jpg,image/png"
                             onChange={handleMainPhotoUpload}
                             style={{ display: 'none' }}
                             id="main-photo-upload"
@@ -899,7 +901,7 @@ const EditPet: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <div className={styles.formatHint}>Поддерживаемые форматы: JPEG, PNG. Максимальный размер: 5MB.</div>
+                    <div className={styles.formatHint}>Поддерживаемые форматы: JPG, PNG. Максимальный размер: 5MB.</div>
                   </div>
                 </div>
 
@@ -927,7 +929,7 @@ const EditPet: React.FC = () => {
                         <div className={styles.photoPlaceholder}>
                           <input
                             type="file"
-                            accept="image/jpeg,image/jpg,image/png"
+                            accept="image/jpg,image/png"
                             onChange={handleAdditionalPhotoUpload}
                             style={{ display: 'none' }}
                             id="additional-photo-upload"
@@ -938,7 +940,7 @@ const EditPet: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    <div className={styles.formatHint}>Поддерживаемые форматы: JPEG, PNG. Максимальный размер: 5MB.</div>
+                    <div className={styles.formatHint}>Поддерживаемые форматы: JPG, PNG. Максимальный размер: 5MB.</div>
                   </div>
                 </div>
               </div>
@@ -980,7 +982,7 @@ const EditPet: React.FC = () => {
                               onChange={handleDocumentUpload}
                               style={{ display: 'none' }}
                               id="document-upload"
-                              accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                              accept=".pdf,.jpg,.png"
                             />
                             <label htmlFor="document-upload" className={styles.uploadButton}>
                               + Добавить документ
@@ -989,7 +991,7 @@ const EditPet: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <div className={styles.formatHint}>Поддерживаемые форматы: JPEG, PNG, PDF. Максимальный размер: 5MB.</div>
+                    <div className={styles.formatHint}>Поддерживаемые форматы: JPG, PNG, PDF. Максимальный размер: 5MB.</div>
                   </div>
                 </div>
               </div>
