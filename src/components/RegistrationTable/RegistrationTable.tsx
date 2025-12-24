@@ -13,7 +13,6 @@ interface LocalContactState {
 }
 
 interface ValidationErrors {
-  email?: string;
   phone?: string;
 }
 
@@ -57,22 +56,10 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
   });
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
-  const [touched, setTouched] = useState<{ email: boolean; phone: boolean }>({
-    email: false,
+  const [touched, setTouched] = useState<{ phone: boolean }>({
     phone: false,
   });
 
-  // Валидация email
-  const validateEmail = (email: string): string | undefined => {
-    if (!email.trim()) {
-      return 'Email обязателен для заполнения';
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return 'Введите корректный email';
-    }
-    return undefined;
-  };
 
   // Валидация телефона (10 цифр после +7)
   const validatePhone = (phone: string): string | undefined => {
@@ -86,15 +73,9 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
     return undefined;
   };
 
-  // Проверка валидности всей формы
+  // Проверка валидности всей формы (только телефон, email валидируется в основной форме)
   const validate = (state: LocalContactState): { errors: ValidationErrors; isValid: boolean } => {
     const errors: ValidationErrors = {};
-
-    // Если есть userEmail, email всегда валиден
-    if (!userEmail) {
-      const emailError = validateEmail(state.email.contact);
-      if (emailError) errors.email = emailError;
-    }
 
     const phoneError = validatePhone(state.phone.contact);
     if (phoneError) errors.phone = phoneError;
@@ -115,23 +96,37 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
     contactInfo.forEach((item) => {
       const key = item.type.toLowerCase() as keyof LocalContactState;
       if (newState[key]) {
-        // Для email используем userEmail если есть
-        if (key === 'email' && userEmail) {
+        // Для email всегда используем userEmail
+        if (key === 'email') {
           newState[key] = {
-            contact: userEmail,
+            contact: userEmail || '',
             visible: true,
           };
         } else {
           newState[key] = {
             contact: item.contact,
-            visible: key === 'email' ? true : item.visible,
+            visible: item.visible,
           };
         }
       }
     });
 
     setLocalState(newState);
-  }, [contactInfo, userEmail]);
+  }, [contactInfo]);
+
+  // Синхронизация email при изменении userEmail
+  useEffect(() => {
+    setLocalState((prev) => {
+      const newState = {
+        ...prev,
+        email: { contact: userEmail || '', visible: true },
+      };
+      // Уведомляем родителя об изменении
+      const { isValid } = validate(newState);
+      onChange(convertToContactInfoArray(newState), isValid);
+      return newState;
+    });
+  }, [userEmail]);
 
   const convertToContactInfoArray = (state: LocalContactState): ContactInfo[] => {
     const result: ContactInfo[] = [];
@@ -148,8 +143,8 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
   };
 
   const handleInputChange = (field: keyof LocalContactState, value: string) => {
-    // Email нельзя менять если передан userEmail
-    if (field === 'email' && userEmail) return;
+    // Email нельзя менять - он синхронизируется с основной формой
+    if (field === 'email') return;
 
     const newState = {
       ...localState,
@@ -163,7 +158,7 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
     onChange(convertToContactInfoArray(newState), isValid);
   };
 
-  const handleBlur = (field: 'email' | 'phone') => {
+  const handleBlur = (field: 'phone') => {
     setTouched((prev) => ({ ...prev, [field]: true }));
     const { errors } = validate(localState);
     setValidationErrors(errors);
@@ -217,17 +212,12 @@ const RegistrationTable: React.FC<RegistrationTableProps> = ({
                   <>
                     <input
                       type="email"
-                      placeholder="Введите email"
+                      placeholder="Email заполняется автоматически"
                       value={localState.email.contact}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      onBlur={() => handleBlur('email')}
-                      className={`${styles.tableInput} ${touched.email && validationErrors.email ? styles.inputError : ''}`}
-                      disabled={isInputDisabled || !!userEmail}
-                      readOnly={!!userEmail}
+                      className={styles.tableInput}
+                      disabled={true}
+                      readOnly={true}
                     />
-                    {touched.email && validationErrors.email && (
-                      <div className={styles.fieldError}>{validationErrors.email}</div>
-                    )}
                   </>
                 )}
               </div>

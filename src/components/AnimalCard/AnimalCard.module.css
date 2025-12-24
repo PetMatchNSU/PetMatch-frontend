@@ -174,7 +174,7 @@
 .card__actions-dropdown {
   position: absolute;
   right: 100%;
-  top: 0;
+  bottom: 0;
   margin-right: 8px;
   background-color: white;
   border: 1px solid #50280E;

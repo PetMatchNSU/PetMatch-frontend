@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDeleteAnimalMutation } from '../../services/animalsApi';
 import styles from './AnimalCard.module.css';
 
 import type { AnimalListItem } from '../../types/animal';
@@ -10,12 +11,14 @@ interface AnimalCardProps {
     reviewComment?: string;
   };
   photoUrl: string | null;
+  onDeleted?: () => void;
 }
 
-export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl }) => {
+export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl, onDeleted }) => {
   const [showActions, setShowActions] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [deleteAnimal, { isLoading: isDeleting }] = useDeleteAnimalMutation();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -72,8 +75,8 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl }) => {
         return 'Продажа';
       case 'FREE':
         return 'Отдам даром';
-      case 'BUY':
-        return 'Случка';
+      case 'PAIRING':
+        return 'Вязка';
       default:
         return '';
     }
@@ -82,6 +85,18 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl }) => {
   // Обработчик клика на карточку
   const handleCardClick = () => {
     navigate(`/animal/${animal.animalId}`);
+  };
+
+  // Обработчик удаления
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteAnimal(animal.animalId).unwrap();
+      setShowActions(false);
+      onDeleted?.();
+    } catch (error) {
+      console.error('Ошибка при удалении:', error);
+    }
   };
 
   return (
@@ -158,12 +173,19 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl }) => {
             <div className={styles['card__actions-dropdown']}>
               <button
                 className={styles['card__edit-button']}
-                onClick={() => navigate(`/animal/update/${animal.animalId}`)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate(`/animal/update/${animal.animalId}`);
+                }}
               >
                 редактировать
               </button>
-              <button className={styles['card__delete-button']}>
-                удалить
+              <button
+                className={styles['card__delete-button']}
+                onClick={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'удаление...' : 'удалить'}
               </button>
             </div>
           )}
