@@ -20,7 +20,7 @@ interface PreferredTimeInputProps {
   label?: string;
   value?: BondTime[];
   labelPosition?: LabelPositionType;
-  onChange?: (value: BondTime[]) => void;
+  onChange?: (value: BondTime[], isValid: boolean) => void;
   error?: string;
   /** Отключить редактирование */
   disabled?: boolean;
@@ -113,6 +113,42 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
     return startH < endH || (startH === endH && startM <= endM);
   };
 
+  // Преобразование времени в минуты для сравнения
+  const timeToMinutes = (time: string): number => {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  };
+
+  // Проверка пересечения двух интервалов
+  const doIntervalsOverlap = (
+    slot1: TimeSlot,
+    slot2: TimeSlot
+  ): boolean => {
+    if (!isSlotComplete(slot1) || !isSlotComplete(slot2)) return false;
+
+    const start1 = timeToMinutes(slot1.bondTimeStart);
+    const end1 = timeToMinutes(slot1.bondTimeEnd);
+    const start2 = timeToMinutes(slot2.bondTimeStart);
+    const end2 = timeToMinutes(slot2.bondTimeEnd);
+
+    // Интервалы пересекаются если один начинается до окончания другого
+    return start1 < end2 && start2 < end1;
+  };
+
+  // Проверка пересечения слота с другими слотами
+  const findOverlappingSlotIndex = (slots: TimeSlot[], currentIndex: number): number | null => {
+    const currentSlot = slots[currentIndex];
+    if (!isSlotComplete(currentSlot)) return null;
+
+    for (let i = 0; i < slots.length; i++) {
+      if (i === currentIndex) continue;
+      if (doIntervalsOverlap(currentSlot, slots[i])) {
+        return i;
+      }
+    }
+    return null;
+  };
+
   // Проверка заполненности слота
   const isSlotComplete = (slot: TimeSlot): boolean => {
     return isValidTime(slot.bondTimeStart) && isValidTime(slot.bondTimeEnd);
@@ -120,7 +156,7 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
 
   // Обновление слотов и вызов onChange
   const updateSlots = (newSlots: TimeSlot[]) => {
-    // Валидация каждого слота
+    // Первый проход: базовая валидация (start < end)
     const validatedSlots = newSlots.map((slot) => {
       if (isValidTime(slot.bondTimeStart) && isValidTime(slot.bondTimeEnd)) {
         if (!isStartBeforeEnd(slot.bondTimeStart, slot.bondTimeEnd)) {
@@ -129,6 +165,21 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
       }
       return { ...slot, error: undefined };
     });
+
+    // Второй проход: проверка на пересечения интервалов
+    for (let i = 0; i < validatedSlots.length; i++) {
+      // Пропускаем слоты с уже существующими ошибками или неполные слоты
+      if (validatedSlots[i].error || !isSlotComplete(validatedSlots[i])) continue;
+
+      const overlappingIndex = findOverlappingSlotIndex(validatedSlots, i);
+      if (overlappingIndex !== null) {
+        // Помечаем оба пересекающихся слота ошибкой
+        validatedSlots[i] = { ...validatedSlots[i], error: 'Интервалы пересекаются' };
+        if (!validatedSlots[overlappingIndex].error) {
+          validatedSlots[overlappingIndex] = { ...validatedSlots[overlappingIndex], error: 'Интервалы пересекаются' };
+        }
+      }
+    }
 
     // Удаляем пустые слоты в конце (кроме первого)
     const trimmedSlots = [...validatedSlots];
@@ -153,7 +204,12 @@ const PreferredTimeInput: React.FC<PreferredTimeInputProps> = ({
       const validSlots = trimmedSlots
         .filter((slot) => isSlotComplete(slot) && !slot.error)
         .map(({ bondTimeStart, bondTimeEnd }) => ({ bondTimeStart, bondTimeEnd }));
-      onChange(validSlots);
+
+      // Проверяем есть ли ошибки в заполненных слотах
+      const hasErrors = trimmedSlots.some((slot) => isSlotComplete(slot) && slot.error);
+      const isFormValid = validSlots.length > 0 && !hasErrors;
+
+      onChange(validSlots, isFormValid);
     }
   };
 

@@ -40,6 +40,7 @@ export const Registration: React.FC = () => {
   const [cityInputValue, setCityInputValue] = useState('');
   const [bondTime, setBondTime] = useState<BondTime[]>([]);
   const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
+  const [isBondTimeValid, setIsBondTimeValid] = useState(false);
 
   const {
     register,
@@ -125,8 +126,9 @@ export const Registration: React.FC = () => {
   };
 
   // Обработчик изменения времени связи
-  const handleBondTimeChange = (times: BondTime[]) => {
+  const handleBondTimeChange = (times: BondTime[], isValid: boolean) => {
     setBondTime(times);
+    setIsBondTimeValid(isValid);
     setValue('bondTime', times, { shouldValidate: true });
   };
 
@@ -284,7 +286,7 @@ export const Registration: React.FC = () => {
           <Button
             type="submit"
             size="large"
-            disabled={!isValid || !isContactInfoValid || isRegisterLoading}
+            disabled={!isValid || !isContactInfoValid || !isBondTimeValid || isRegisterLoading}
             className={styles.registration__submit}
           >
             {isRegisterLoading ? 'Регистрация...' : 'Зарегистрироваться'}

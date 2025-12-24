@@ -209,9 +209,9 @@ const Profile: React.FC = () => {
   };
 
   // Обработчик изменения времени связи
-  const handleBondTimeChange = (times: BondTime[]) => {
+  const handleBondTimeChange = (times: BondTime[], isValid: boolean) => {
     setBondTime(times);
-    setIsBondTimeValid(times.length > 0);
+    setIsBondTimeValid(isValid);
   };
 
   // Обработчик изменения контактной информации

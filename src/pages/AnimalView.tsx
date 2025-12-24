@@ -100,8 +100,14 @@ export const AnimalView: React.FC = () => {
         }).unwrap();
 
         if (filesResponse.descriptors) {
+          // Фильтруем только файлы, принадлежащие текущему животному
+          const animalIdStr = animalId.toString();
+          const validDescriptors = filesResponse.descriptors.filter(
+            (f) => f.card_id === animalIdStr
+          );
+
           // Обрабатываем фото
-          const photoDescriptors = filesResponse.descriptors.filter((f) => f.file_type === 'photo');
+          const photoDescriptors = validDescriptors.filter((f) => f.file_type === 'photo');
 
           // Определяем главное фото по mainPhotoId из animal
           const mainPhotoId = animal.photos.mainPhotoId?.toString();
@@ -120,7 +126,7 @@ export const AnimalView: React.FC = () => {
           setPhotos(loadedPhotos);
 
           // Обрабатываем документы (просто список без типов)
-          const docDescriptors = filesResponse.descriptors.filter((f) => f.file_type === 'doc');
+          const docDescriptors = validDescriptors.filter((f) => f.file_type === 'doc');
           const loadedDocs: DocumentItem[] = docDescriptors.map((doc) => {
             const mimeType = getMimeType(doc.original_filename);
             return {

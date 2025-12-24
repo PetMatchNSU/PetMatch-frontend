@@ -308,6 +308,29 @@ export interface FileDeleteResponse {
 }
 
 // ===========================================
+// API: GET /api/v1/user/animals/list
+// ===========================================
+
+// Питомец пользователя (для страницы "Мои питомцы")
+export interface UserAnimalItem {
+  id: number;
+  name: string;
+  speciesName: string;
+  goal: AnimalGoal;
+  breed?: string | null;
+  gender: AnimalGender;
+  birthday: string; // YYYY-MM-DD
+  mainPhotoId: number | null;
+  reviewStatus: 'ON_CHECKING' | 'OK' | 'BLOCKED';
+  reviewComment?: string;
+}
+
+// Ответ на запрос списка питомцев пользователя
+export interface UserAnimalsListResponse {
+  animalsList: UserAnimalItem[];
+}
+
+// ===========================================
 // API: GET /api/v1/animals/show/{animalId}/contacts
 // ===========================================
 

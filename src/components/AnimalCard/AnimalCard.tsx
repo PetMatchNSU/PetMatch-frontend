@@ -5,7 +5,10 @@ import styles from './AnimalCard.module.css';
 import type { AnimalListItem } from '../../types/animal';
 
 interface AnimalCardProps {
-  animal: AnimalListItem & { reviewStatus?: string };
+  animal: AnimalListItem & {
+    reviewStatus?: string;
+    reviewComment?: string;
+  };
   photoUrl: string | null;
 }
 
@@ -33,14 +36,32 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl }) => {
   // Function to get status text based on reviewStatus
   const getStatusText = () => {
     switch (animal.reviewStatus) {
+      case 'OK':
       case 'PUBLISHED':
         return 'Опубликовано';
       case 'BLOCKED':
         return 'Заблокировано';
+      case 'ON_CHECKING':
       case 'ON_MODERATION':
-        return 'На модерации';
+        return 'На проверке';
       default:
         return 'Неизвестно';
+    }
+  };
+
+  // Получить CSS класс для статуса
+  const getStatusClass = () => {
+    switch (animal.reviewStatus) {
+      case 'OK':
+      case 'PUBLISHED':
+        return styles.card__status_published;
+      case 'BLOCKED':
+        return styles.card__status_blocked;
+      case 'ON_CHECKING':
+      case 'ON_MODERATION':
+        return styles.card__status_checking;
+      default:
+        return '';
     }
   };
 
@@ -78,13 +99,20 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl }) => {
 
       {/* Status and gender in one row */}
       <div className={styles.card__header}>
-        <div className={`${styles.card__status} ${animal.reviewStatus === 'PUBLISHED' ? styles.card__status_published : ''}`}>
+        <div className={`${styles.card__status} ${getStatusClass()}`}>
           {getStatusText()}
         </div>
         <div className={styles.card__gender}>
           {animal.gender === 'M' ? '♂' : '♀'}
         </div>
       </div>
+
+      {/* Комментарий модератора (если заблокировано) */}
+      {animal.reviewStatus === 'BLOCKED' && animal.reviewComment && (
+        <div className={styles.card__reviewComment}>
+          {animal.reviewComment}
+        </div>
+      )}
 
       {/* Name */}
       <div className={styles.card__name}>

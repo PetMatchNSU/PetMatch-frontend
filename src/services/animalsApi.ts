@@ -20,6 +20,7 @@ import type {
   FileGetResponse,
   FileDeleteRequest,
   FileDeleteResponse,
+  UserAnimalsListResponse,
   AnimalOwnerContactsResponse,
 } from '../types/animal';
 
@@ -194,6 +195,12 @@ export const animalsApi = baseApi.injectEndpoints({
     getAnimalOwnerContacts: builder.query<AnimalOwnerContactsResponse, number>({
       query: (animalId) => `/animals/show/${animalId}/contacts`,
     }),
+
+    // GET /api/v1/user/animals/list - Получить список питомцев пользователя
+    getUserAnimals: builder.query<UserAnimalsListResponse, void>({
+      query: () => '/user/animals/list',
+      providesTags: ['Pet'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -214,4 +221,5 @@ export const {
   useLazyGetFilesQuery,
   useDeleteFilesMutation,
   useLazyGetAnimalOwnerContactsQuery,
+  useGetUserAnimalsQuery,
 } = animalsApi;
