@@ -25,6 +25,7 @@ import Select from '../components/Select/Select';
 import PreferredTimeInput from '../components/PreferredTimeInput';
 import RegistrationTable from '../components/RegistrationTable';
 import styles from './Profile.module.css';
+import { selectContactInfo } from '../store/profileSelectors';
 
 // Префиксы для контактов (должны совпадать с RegistrationTable)
 const CONTACT_PREFIXES: Record<string, string> = {
@@ -98,7 +99,11 @@ interface ProfileFormData {
 const Profile: React.FC = () => {
   // Redux
   const user = useSelector(selectUser);
+  const profileContactInfo = useSelector(selectContactInfo);
+  console.log(user);
+  console.log(profileContactInfo)
   const userEmail = user?.email || '';
+  // const userContactEmail = profileContactInfo[0]?.contact || ''
 
   // RTK Query
   const { data: profile, isLoading, error: loadError, refetch } = useGetUserProfileQuery();
@@ -118,6 +123,7 @@ const Profile: React.FC = () => {
   const [contactInfo, setContactInfo] = useState<ContactInfo[]>([]);
   const [isContactInfoValid, setIsContactInfoValid] = useState(true);
   const [isBondTimeValid, setIsBondTimeValid] = useState(true);
+  const [contactEmail, setContactEmail] = useState('');
 
   // React Hook Form
   const {
@@ -180,7 +186,11 @@ const Profile: React.FC = () => {
     })) || [];
     setContactInfo(contacts);
     setIsContactInfoValid(contacts.length > 0);
-  }, [profile, reset]);
+
+    // Извлекаем email из контактов профиля
+    const emailContact = profile.contactInfo?.find((item: ContactInfoItem) => item.type === 'EMAIL');
+    setContactEmail(emailContact?.contact || userEmail || '');
+  }, [profile, reset, userEmail]);
 
   // Загрузка данных профиля
   useEffect(() => {
@@ -473,7 +483,7 @@ const Profile: React.FC = () => {
             <RegistrationTable
               contactInfo={contactInfo}
               onChange={handleContactInfoChange}
-              userEmail={userEmail}
+              userEmail={contactEmail}
               viewMode={!isEditing}
               disabled={!isEditing}
               error={!isContactInfoValid && isEditing ? 'Укажите хотя бы один способ связи' : undefined}

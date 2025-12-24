@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDeleteAnimalMutation } from '../../services/animalsApi';
+import { useDeleteAnimalMutation, useDeleteFilesMutation } from '../../services/animalsApi';
 import styles from './AnimalCard.module.css';
 
 import type { AnimalListItem } from '../../types/animal';
@@ -18,7 +18,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl, onDele
   const [showActions, setShowActions] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const [deleteAnimal, { isLoading: isDeleting }] = useDeleteAnimalMutation();
+  const [deleteAnimal, { isLoading: isDeletingAnimal }] = useDeleteAnimalMutation();
+  const [deleteFiles, { isLoading: isDeletingFiles }] = useDeleteFilesMutation();
+  const isDeleting = isDeletingAnimal || isDeletingFiles;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -91,6 +93,9 @@ export const AnimalCard: React.FC<AnimalCardProps> = ({ animal, photoUrl, onDele
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
+      // Сначала удаляем все файлы связанные с карточкой
+      await deleteFiles({ cardIds: [animal.animalId.toString()] }).unwrap();
+      // Затем удаляем саму карточку
       await deleteAnimal(animal.animalId).unwrap();
       setShowActions(false);
       onDeleted?.();
