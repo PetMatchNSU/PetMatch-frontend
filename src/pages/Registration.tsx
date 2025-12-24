@@ -236,6 +236,7 @@ export const Registration: React.FC = () => {
           <RegistrationTable
             contactInfo={contactInfo}
             onChange={handleContactInfoChange}
+            userEmail={watch('email')}
             error={errors.contactInfo?.message}
           />
 

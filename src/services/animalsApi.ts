@@ -201,6 +201,15 @@ export const animalsApi = baseApi.injectEndpoints({
       query: () => '/user/animals/list',
       providesTags: ['Pet'],
     }),
+
+    // DELETE /api/v1/animals/{animalId} - Удалить карточку питомца
+    deleteAnimal: builder.mutation<void, number>({
+      query: (animalId) => ({
+        url: `/animals/${animalId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Pet'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -222,4 +231,5 @@ export const {
   useDeleteFilesMutation,
   useLazyGetAnimalOwnerContactsQuery,
   useGetUserAnimalsQuery,
+  useDeleteAnimalMutation,
 } = animalsApi;

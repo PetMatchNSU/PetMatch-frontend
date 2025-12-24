@@ -106,6 +106,12 @@ export const Feed: React.FC = () => {
 
       // Загружаем фото для полученных животных
       const animalIds = result.animalsList.map((a) => a.animalId);
+      // Создаём карту mainPhotoId для каждого животного
+      const mainPhotoIdMap: Record<string, number | null> = {};
+      for (const animal of result.animalsList) {
+        mainPhotoIdMap[animal.animalId.toString()] = animal.mainPhotoId ?? null;
+      }
+
       // Вызываем loadPhotos напрямую, не добавляя в зависимости
       fetchFiles({
         cardIds: animalIds.map((id) => id.toString()),
@@ -124,7 +130,16 @@ export const Feed: React.FC = () => {
           }
 
           for (const [cardId, photos] of Object.entries(photosByCard)) {
-            const mainPhoto = photos.find((p) => p.is_main) || photos[0];
+            // Приоритет: 1) mainPhotoId из списка животных, 2) is_main из файла, 3) первое фото
+            const expectedMainPhotoId = mainPhotoIdMap[cardId];
+            let mainPhoto = expectedMainPhotoId
+              ? photos.find((p) => p.file_id === expectedMainPhotoId.toString())
+              : null;
+
+            if (!mainPhoto) {
+              mainPhoto = photos.find((p) => p.is_main) || photos[0];
+            }
+
             if (mainPhoto) {
               const mimeType = getMimeType(mainPhoto.original_filename);
               newPhotos[parseInt(cardId)] = base64ToDataUrl(mainPhoto.content, mimeType);
