@@ -888,7 +888,7 @@ const EditPet: React.FC = () => {
                         <div className={styles.photoPlaceholder}>
                           <input
                             type="file"
-                            accept="image/jpeg,image/jpg,image/png,application/pdf"
+                            accept="image/jpeg,image/jpg,image/png"
                             onChange={handleMainPhotoUpload}
                             style={{ display: 'none' }}
                             id="main-photo-upload"
@@ -899,6 +899,7 @@ const EditPet: React.FC = () => {
                         </div>
                       )}
                     </div>
+                    <div className={styles.formatHint}>Поддерживаемые форматы: JPEG, PNG. Максимальный размер: 5MB.</div>
                   </div>
                 </div>
 
@@ -926,7 +927,7 @@ const EditPet: React.FC = () => {
                         <div className={styles.photoPlaceholder}>
                           <input
                             type="file"
-                            accept="image/jpeg,image/jpg,image/png,application/pdf"
+                            accept="image/jpeg,image/jpg,image/png"
                             onChange={handleAdditionalPhotoUpload}
                             style={{ display: 'none' }}
                             id="additional-photo-upload"
@@ -937,6 +938,7 @@ const EditPet: React.FC = () => {
                         </div>
                       )}
                     </div>
+                    <div className={styles.formatHint}>Поддерживаемые форматы: JPEG, PNG. Максимальный размер: 5MB.</div>
                   </div>
                 </div>
               </div>
@@ -987,6 +989,7 @@ const EditPet: React.FC = () => {
                         </div>
                       </div>
                     </div>
+                    <div className={styles.formatHint}>Поддерживаемые форматы: JPEG, PNG, PDF. Максимальный размер: 5MB.</div>
                   </div>
                 </div>
               </div>

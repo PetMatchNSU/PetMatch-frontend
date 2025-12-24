@@ -67,6 +67,12 @@
   margin-top: 4px;
 }
 
+.formatHint {
+  color: #666;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
 .textarea {
   width: 100%;
   padding: 10px 12px;
